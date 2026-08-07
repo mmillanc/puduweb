@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# PuduWeb
 
-## Getting Started
+Directorio de profesionales, pymes y vendedores estilo páginas amarillas. Los usuarios pueden buscar perfiles por categoría, tipo o ubicación, ver tarjetas resumidas y al hacer clic acceder a una página de detalle tipo landing con toda la información.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, React Compiler)
+- **React 19** + **TypeScript 5**
+- **Tailwind CSS 4**
+- **Supabase** (PostgreSQL + Auth)
+- **lucide-react** (iconos)
+
+## Configuración
+
+### 1. Crear proyecto en Supabase
+
+1. Ve a [supabase.com](https://supabase.com) y crea un nuevo proyecto.
+2. En **Project Settings > API**, copia:
+   - `Project URL` (ej: `https://xxxxx.supabase.co`)
+   - `anon public key`
+
+### 2. Configurar variables de entorno
+
+Copia `.env.example` a `.env.local` y completa con tus datos:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key-aqui
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Crear tablas en Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Abre el **SQL Editor** en Supabase y ejecuta el archivo `supabase_setup.sql` (incluido en la raíz del proyecto). Esto crea:
+- Tabla `categories` con 12 categorías iniciales
+- Tabla `profiles` con todos los campos
+- Políticas RLS (lectura pública, escritura solo autenticados)
+- Índices para búsqueda
 
-## Learn More
+### 4. Crear usuario administrador
 
-To learn more about Next.js, take a look at the following resources:
+1. En Supabase, ve a **Authentication > Users**.
+2. Click **Add user** y crea un usuario con email y contraseña.
+3. Este usuario podrá iniciar sesión en `/admin/login`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. Instalar dependencias y ejecutar
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+Abre [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estructura
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+├── layout.tsx              # Layout raíz (navbar + footer)
+├── page.tsx                # Home: búsqueda, filtros y grid de tarjetas
+├── globals.css             # Estilos globales (Tailwind v4 + variables)
+├── categorias/page.tsx     # Listado de categorías con contador
+├── perfil/[slug]/page.tsx  # Página de detalle de perfil (landing)
+├── admin/
+│   ├── layout.tsx          # Protección de rutas admin
+│   ├── page.tsx            # Dashboard: listado + CRUD de perfiles
+│   └── login/page.tsx      # Login admin
+components/
+├── navbar.tsx              # Navbar con menú responsive
+├── footer.tsx              # Footer
+├── profile-card.tsx        # Tarjeta de perfil (vista resumida)
+└── profile-form.tsx        # Formulario crear/editar perfil
+lib/
+├── supabase-client.ts      # Cliente Supabase (browser)
+├── supabase-server.ts      # Cliente Supabase (server-side)
+├── types.ts                # Tipos TypeScript
+└── utils.ts                # Utilidades (cn, slugify)
+```
+
+## Funcionalidades
+
+- **Búsqueda** por nombre, tagline o ciudad (con debounce)
+- **Filtros** por categoría y tipo (profesional, pyme, vendedor)
+- **Tarjetas** con avatar, portada, tagline, categoría y ubicación
+- **Página de detalle** con descripción, servicios, galería, contacto, redes sociales y WhatsApp
+- **Panel admin** con login, listado de perfiles, crear/editar/eliminar, publicar/despublicar, destacar
+- **Soporte dark mode** automático
+- **Diseño responsive**
+
+## Próximas funcionalidades sugeridas
+
+- Sistema de reseñas y calificaciones
+- Perfiles favoritos
+- Carga de imágenes a Supabase Storage
+- Mapa interactivo con ubicación
+- Páginas de categoría individuales
+- SEO con sitemap y Open Graph
+- Autogestión para profesionales (registro propio)
