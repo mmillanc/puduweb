@@ -25,6 +25,9 @@ import {
   Users,
   AlertCircle,
   Download,
+  Mail,
+  X,
+  Check,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -40,6 +43,16 @@ export default function AdminDashboard() {
   const [assigningProfile, setAssigningProfile] = useState<Profile | null>(null);
   const [showCategories, setShowCategories] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const [showDeletionRequests, setShowDeletionRequests] = useState(false);
+  const [deletionRequests, setDeletionRequests] = useState<Array<{
+    id: string;
+    profile_id: string;
+    user_id: string;
+    reason: string | null;
+    status: string;
+    created_at: string;
+    profile_name?: string;
+  }>>([]);
 
   const fetchProfiles = useCallback(async () => {
     setLoading(true);
@@ -66,6 +79,45 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchProfiles();
   }, [fetchProfiles]);
+
+  async function fetchDeletionRequests() {
+    const { data } = await supabase
+      .from("deletion_requests")
+      .select("*")
+    .order("created_at", { ascending: false });
+    if (data) {
+      const profileIds = data.map((r: { profile_id: string }) => r.profile_id);
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, name")
+        .in("id", profileIds);
+      const nameMap = new Map((profilesData ?? []).map((p: { id: string; name: string }) => [p.id, p.name]));
+      setDeletionRequests(data.map((r: typeof deletionRequests[0]) => ({
+        ...r,
+        profile_name: nameMap.get(r.profile_id) ?? "Desconocido",
+      })));
+    }
+  }
+
+  async function resolveDeletionRequest(requestId: string, profileId: string, approve: boolean) {
+    if (approve) {
+      if (!confirm("¿Aprobar eliminación? El perfil se eliminará permanentemente.")) return;
+      await supabase
+        .from("deletion_requests")
+        .update({ status: "approved", resolved_at: new Date().toISOString() })
+        .eq("id", requestId);
+      await supabase.from("profiles").delete().eq("id", profileId);
+      showToast("Perfil eliminado y solicitud aprobada");
+    } else {
+      await supabase
+        .from("deletion_requests")
+        .update({ status: "rejected", resolved_at: new Date().toISOString() })
+        .eq("id", requestId);
+      showToast("Solicitud rechazada");
+    }
+    fetchDeletionRequests();
+    fetchProfiles();
+  }
 
   async function handleDelete(id: string) {
     if (!confirm("¿Eliminar este perfil permanentemente?")) return;
@@ -163,6 +215,16 @@ export default function AdminDashboard() {
             Usuarios
           </button>
           <button
+            onClick={() => {
+              fetchDeletionRequests();
+              setShowDeletionRequests(true);
+            }}
+            className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium hover:bg-muted"
+          >
+            <Mail size={16} />
+            Eliminación
+          </button>
+          <button
             onClick={handleLogout}
             className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium hover:bg-muted"
           >
@@ -176,6 +238,7 @@ export default function AdminDashboard() {
         <ProfileForm
           categories={categories}
           profile={editingProfile}
+          isAdmin
           onClose={() => {
             setShowForm(false);
             setEditingProfile(null);
@@ -388,6 +451,79 @@ export default function AdminDashboard() {
       )}
 
       {showUsers && <UsersModal onClose={() => setShowUsers(false)} />}
+
+      {showDeletionRequests && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-card shadow-xl">
+            <div className="flex items-center justify-between border-b p-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold">
+                <Mail size={20} /> Solicitudes de eliminación
+              </h2>
+              <button
+                onClick={() => setShowDeletionRequests(false)}
+                className="rounded-lg p-1.5 hover:bg-muted"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto p-4 space-y-3">
+              {deletionRequests.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-8">
+                  No hay solicitudes de eliminación.
+                </p>
+              ) : (
+                deletionRequests.map((r) => (
+                  <div
+                    key={r.id}
+                    className={`rounded-lg border p-3 ${
+                      r.status === "pending"
+                        ? "border-orange-300 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/30"
+                        : "bg-muted/30"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="font-medium text-sm">{r.profile_name}</span>
+                        <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          r.status === "pending"
+                            ? "bg-orange-200 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
+                            : r.status === "approved"
+                            ? "bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300"
+                            : "bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-300"
+                        }`}>
+                          {r.status === "pending" ? "Pendiente" : r.status === "approved" ? "Aprobada" : "Rechazada"}
+                        </span>
+                      </div>
+                      {r.status === "pending" && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => resolveDeletionRequest(r.id, r.profile_id, true)}
+                            className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600"
+                          >
+                            <Check size={14} /> Aprobar
+                          </button>
+                          <button
+                            onClick={() => resolveDeletionRequest(r.id, r.profile_id, false)}
+                            className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                          >
+                            Rechazar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {r.reason && (
+                      <p className="mt-2 text-sm text-muted-foreground">Motivo: {r.reason}</p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {new Date(r.created_at).toLocaleString("es-CL")}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

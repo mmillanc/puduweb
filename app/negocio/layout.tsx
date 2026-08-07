@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
-import { supabaseServer } from "@/lib/supabase-server";
+import { getSupabaseServer } from "@/lib/supabase-server";
 
 export default async function NegocioLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabaseServer = await getSupabaseServer();
   const {
     data: { session },
   } = await supabaseServer.auth.getSession();

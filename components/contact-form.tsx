@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-client";
+import { isValidEmail } from "@/lib/validations";
 import { Loader2, Send, Mail, CheckCircle2 } from "lucide-react";
 
 interface ContactFormProps {
@@ -22,8 +23,22 @@ export function ContactForm({ profileId, profileName }: ContactFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSending(true);
     setError(null);
+
+    if (!name.trim()) {
+      setError("Ingresa tu nombre");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("Ingresa un email válido");
+      return;
+    }
+    if (message.trim().length < 10) {
+      setError("El mensaje debe tener al menos 10 caracteres");
+      return;
+    }
+
+    setSending(true);
 
     const { error: insertError } = await supabase
       .from("contact_messages")

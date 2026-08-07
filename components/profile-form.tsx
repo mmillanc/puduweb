@@ -11,6 +11,7 @@ interface ProfileFormProps {
   categories: Category[];
   profile: Profile | null;
   onClose: () => void;
+  isAdmin?: boolean;
 }
 
 const emptyForm = {
@@ -41,7 +42,7 @@ const emptyForm = {
   featured: false,
 };
 
-export function ProfileForm({ categories, profile, onClose }: ProfileFormProps) {
+export function ProfileForm({ categories, profile, onClose, isAdmin = false }: ProfileFormProps) {
   const [form, setForm] = useState(
     profile
       ? {
@@ -116,17 +117,21 @@ export function ProfileForm({ categories, profile, onClose }: ProfileFormProps) 
       hours: form.hours || null,
       gallery_urls: galleryArray.length > 0 ? galleryArray : null,
       is_published: form.is_published,
-      featured: form.featured,
+      featured: isAdmin ? form.featured : undefined,
     };
+
+    const cleanPayload = Object.fromEntries(
+      Object.entries(payload).filter(([, v]) => v !== undefined)
+    );
 
     let result;
     if (profile) {
       result = await supabase
         .from("profiles")
-        .update({ ...payload, updated_at: new Date().toISOString() })
+        .update({ ...cleanPayload, updated_at: new Date().toISOString() })
         .eq("id", profile.id);
     } else {
-      result = await supabase.from("profiles").insert(payload);
+      result = await supabase.from("profiles").insert(cleanPayload);
     }
 
     if (result.error) {
@@ -422,7 +427,7 @@ export function ProfileForm({ categories, profile, onClose }: ProfileFormProps) 
           </div>
         </fieldset>
 
-        {/* Estado */}
+        {/* Estado — negocio puede publicar, solo admin puede destacar */}
         <fieldset className="space-y-3">
           <legend className="mb-2 text-sm font-semibold text-muted-foreground">
             Estado
@@ -437,6 +442,7 @@ export function ProfileForm({ categories, profile, onClose }: ProfileFormProps) 
               />
               Publicado
             </label>
+            {isAdmin && (
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -446,6 +452,7 @@ export function ProfileForm({ categories, profile, onClose }: ProfileFormProps) 
               />
               Destacado
             </label>
+            )}
           </div>
         </fieldset>
 

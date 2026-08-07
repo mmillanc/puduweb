@@ -24,30 +24,17 @@ export function UsersModal({ onClose }: UserModalProps) {
     async function fetchUsers() {
       const { data: rolesData } = await supabase
         .from("user_roles")
-        .select("user_id, role")
+        .select("user_id, role, created_at")
         .order("created_at", { ascending: false });
 
       const userRows: UserRow[] = (rolesData ?? []).map((r: { user_id: string; role: RoleType }) => ({
         user_id: r.user_id,
         role: r.role,
-        email: "Cargando...",
+        email: r.user_id.slice(0, 8) + "...",
       }));
 
       setUsers(userRows);
       setLoading(false);
-
-      for (const u of userRows) {
-        const { data: authData } = await supabase.auth.admin.getUserById(u.user_id);
-        if (authData?.user?.email) {
-          setUsers((prev) =>
-            prev.map((p) =>
-              p.user_id === u.user_id
-                ? { ...p, email: authData.user!.email ?? "N/A" }
-                : p
-            )
-          );
-        }
-      }
     }
     fetchUsers();
   }, []);
@@ -107,7 +94,7 @@ export function UsersModal({ onClose }: UserModalProps) {
                       {u.email[0]?.toUpperCase() ?? "?"}
                     </div>
                     <div>
-                      <div className="text-sm font-medium">{u.email}</div>
+                      <div className="text-sm font-medium font-mono">{u.email}</div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         {roleIcon(u.role)}
                         {u.role}

@@ -4,8 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
 import { slugify } from "@/lib/utils";
+import {
+  isValidEmail,
+  isValidPhone,
+  isValidUrl,
+  isValidInstagram,
+  isValidWhatsApp,
+  passwordStrength,
+  isDisposableEmail,
+} from "@/lib/validations";
 import type { Category } from "@/lib/types";
-import { Loader2, User, Store, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Loader2, User, Store, ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,8 +24,11 @@ export default function RegisterPage() {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [email, setEmail] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [bizName, setBizName] = useState("");
   const [bizType, setBizType] = useState<"profesional" | "pyme" | "vendedor">("pyme");
@@ -42,19 +54,55 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
+
+    const errors: Record<string, string> = {};
+
+    // Validar email
+    if (!isValidEmail(email)) {
+      errors.email = "Ingresa un email válido";
+    } else if (isDisposableEmail(email)) {
+      errors.email = "No se permiten emails temporales o desechables";
+    }
+
+    // Validar contraseña
+    const pwCheck = passwordStrength(password);
+    if (pwCheck.score < 3) {
+      errors.password = "La contraseña es muy débil. Usa mínimo 8 caracteres, mayúsculas, números y símbolos.";
+    }
 
     if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
+      errors.confirmPassword = "Las contraseñas no coinciden";
     }
 
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
-      return;
+    // Validar campos de negocio
+    if (role === "negocio") {
+      if (!bizName.trim()) {
+        errors.bizName = "El nombre del negocio es obligatorio";
+      }
+      if (!bizCategoryId) {
+        errors.bizCategoryId = "Selecciona una categoría";
+      }
+      if (bizPhone && !isValidPhone(bizPhone)) {
+        errors.bizPhone = "Teléfono inválido. Ej: +56 9 1234 5678";
+      }
+      if (bizWebsite && !isValidUrl(bizWebsite)) {
+        errors.bizWebsite = "URL inválida. Debe incluir http:// o https://";
+      }
+      if (bizInstagram && !isValidInstagram(bizInstagram)) {
+        errors.bizInstagram = "Usuario de Instagram inválido";
+      }
+      if (bizWhatsapp && !isValidWhatsApp(bizWhatsapp)) {
+        errors.bizWhatsapp = "Número de WhatsApp inválido";
+      }
+      if (!bizDescription.trim() || bizDescription.trim().length < 20) {
+        errors.bizDescription = "Describe tu negocio (mínimo 20 caracteres)";
+      }
     }
 
-    if (role === "negocio" && (!bizName || !bizCategoryId)) {
-      setError("Completa el nombre y categoría del negocio");
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setLoading(false);
       return;
     }
 
@@ -197,33 +245,108 @@ export default function RegisterPage() {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailTouched && fieldErrors.email) {
+                  setFieldErrors((prev) => ({ ...prev, email: "" }));
+                }
+              }}
+              onBlur={() => {
+                setEmailTouched(true);
+                if (email && !isValidEmail(email)) {
+                  setFieldErrors((prev) => ({ ...prev, email: "Email inválido" }));
+                } else if (email && isDisposableEmail(email)) {
+                  setFieldErrors((prev) => ({ ...prev, email: "No se permiten emails temporales" }));
+                }
+              }}
+              className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                fieldErrors.email ? "border-red-500" : ""
+              }`}
               placeholder="tu@email.com"
             />
+            {fieldErrors.email && (
+              <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Contraseña</label>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Contraseña</label>
+            <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Mín. 6 caracteres"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) {
+                    setFieldErrors((prev) => ({ ...prev, password: "" }));
+                  }
+                }}
+                className={`w-full rounded-lg border bg-background px-3 py-2.5 pr-10 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                  fieldErrors.password ? "border-red-500" : ""
+                }`}
+                placeholder="Mín. 8 caracteres"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Confirmar</label>
-              <input
-                type="password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
+            {password && (
+              <div className="mt-2">
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 flex-1 rounded-full transition-all ${
+                        i < passwordStrength(password).score
+                          ? passwordStrength(password).color
+                          : "bg-muted"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {passwordStrength(password).label}
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
+                  {passwordStrength(password).checks.map((c, i) => (
+                    <span
+                      key={i}
+                      className={`text-xs ${c.passed ? "text-green-500" : "text-muted-foreground"}`}
+                    >
+                      {c.passed ? "✓" : "○"} {c.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {fieldErrors.password && (
+              <p className="mt-1 text-xs text-red-500">{fieldErrors.password}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Confirmar contraseña</label>
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (fieldErrors.confirmPassword) {
+                  setFieldErrors((prev) => ({ ...prev, confirmPassword: "" }));
+                }
+              }}
+              className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                fieldErrors.confirmPassword ? "border-red-500" : ""
+              }`}
+            />
+            {fieldErrors.confirmPassword && (
+              <p className="mt-1 text-xs text-red-500">{fieldErrors.confirmPassword}</p>
+            )}
           </div>
         </div>
 
@@ -239,10 +362,18 @@ export default function RegisterPage() {
               <input
                 required
                 value={bizName}
-                onChange={(e) => setBizName(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                onChange={(e) => {
+                  setBizName(e.target.value);
+                  if (fieldErrors.bizName) setFieldErrors((prev) => ({ ...prev, bizName: "" }));
+                }}
+                className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                  fieldErrors.bizName ? "border-red-500" : ""
+                }`}
                 placeholder="Ej: Kinesiología San Juan"
               />
+              {fieldErrors.bizName && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.bizName}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -263,8 +394,13 @@ export default function RegisterPage() {
                 <select
                   required
                   value={bizCategoryId}
-                  onChange={(e) => setBizCategoryId(e.target.value)}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(e) => {
+                    setBizCategoryId(e.target.value);
+                    if (fieldErrors.bizCategoryId) setFieldErrors((prev) => ({ ...prev, bizCategoryId: "" }));
+                  }}
+                  className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                    fieldErrors.bizCategoryId ? "border-red-500" : ""
+                  }`}
                 >
                   <option value="">Seleccionar...</option>
                   {categories.map((c) => (
@@ -300,10 +436,18 @@ export default function RegisterPage() {
                 <label className="mb-1.5 block text-sm font-medium">Teléfono</label>
                 <input
                   value={bizPhone}
-                  onChange={(e) => setBizPhone(e.target.value)}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(e) => {
+                    setBizPhone(e.target.value);
+                    if (fieldErrors.bizPhone) setFieldErrors((prev) => ({ ...prev, bizPhone: "" }));
+                  }}
+                  className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                    fieldErrors.bizPhone ? "border-red-500" : ""
+                  }`}
                   placeholder="+56 9 1234 5678"
                 />
+                {fieldErrors.bizPhone && (
+                  <p className="mt-1 text-xs text-red-500">{fieldErrors.bizPhone}</p>
+                )}
               </div>
             </div>
 
@@ -311,10 +455,18 @@ export default function RegisterPage() {
               <label className="mb-1.5 block text-sm font-medium">Sitio web</label>
               <input
                 value={bizWebsite}
-                onChange={(e) => setBizWebsite(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                onChange={(e) => {
+                  setBizWebsite(e.target.value);
+                  if (fieldErrors.bizWebsite) setFieldErrors((prev) => ({ ...prev, bizWebsite: "" }));
+                }}
+                className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                  fieldErrors.bizWebsite ? "border-red-500" : ""
+                }`}
                 placeholder="https://mi-tienda.cl"
               />
+              {fieldErrors.bizWebsite && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.bizWebsite}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -322,19 +474,35 @@ export default function RegisterPage() {
                 <label className="mb-1.5 block text-sm font-medium">Instagram</label>
                 <input
                   value={bizInstagram}
-                  onChange={(e) => setBizInstagram(e.target.value)}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(e) => {
+                    setBizInstagram(e.target.value);
+                    if (fieldErrors.bizInstagram) setFieldErrors((prev) => ({ ...prev, bizInstagram: "" }));
+                  }}
+                  className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                    fieldErrors.bizInstagram ? "border-red-500" : ""
+                  }`}
                   placeholder="@mi_negocio"
                 />
+                {fieldErrors.bizInstagram && (
+                  <p className="mt-1 text-xs text-red-500">{fieldErrors.bizInstagram}</p>
+                )}
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium">WhatsApp</label>
                 <input
                   value={bizWhatsapp}
-                  onChange={(e) => setBizWhatsapp(e.target.value)}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(e) => {
+                    setBizWhatsapp(e.target.value);
+                    if (fieldErrors.bizWhatsapp) setFieldErrors((prev) => ({ ...prev, bizWhatsapp: "" }));
+                  }}
+                  className={`w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                    fieldErrors.bizWhatsapp ? "border-red-500" : ""
+                  }`}
                   placeholder="+56912345678"
                 />
+                {fieldErrors.bizWhatsapp && (
+                  <p className="mt-1 text-xs text-red-500">{fieldErrors.bizWhatsapp}</p>
+                )}
               </div>
             </div>
 
@@ -342,10 +510,18 @@ export default function RegisterPage() {
               <label className="mb-1.5 block text-sm font-medium">Descripción</label>
               <textarea
                 value={bizDescription}
-                onChange={(e) => setBizDescription(e.target.value)}
-                className="min-h-[80px] w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                onChange={(e) => {
+                  setBizDescription(e.target.value);
+                  if (fieldErrors.bizDescription) setFieldErrors((prev) => ({ ...prev, bizDescription: "" }));
+                }}
+                className={`min-h-[80px] w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary ${
+                  fieldErrors.bizDescription ? "border-red-500" : ""
+                }`}
                 placeholder="Cuenta sobre tu negocio, servicios que ofreces, experiencia..."
               />
+              {fieldErrors.bizDescription && (
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.bizDescription}</p>
+              )}
             </div>
 
             <div className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-xs text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">

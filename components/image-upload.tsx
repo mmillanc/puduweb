@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
 import { Upload, Loader2, X, ImagePlus } from "lucide-react";
 
@@ -21,7 +21,14 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? null);
+    });
+  }, []);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -32,11 +39,23 @@ export function ImageUpload({
       return;
     }
 
+    if (!userId) {
+      setError("Debes iniciar sesión para subir imágenes");
+      return;
+    }
+
+    // Validar tipo de archivo
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Solo se permiten imágenes JPG, PNG, WebP o GIF");
+      return;
+    }
+
     setUploading(true);
     setError(null);
 
     const ext = file.name.split(".").pop();
-    const fileName = `${folder}/${Date.now()}.${ext}`;
+    const fileName = `${userId}/${folder}/${Date.now()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from("profile-images")
