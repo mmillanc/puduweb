@@ -8,20 +8,18 @@ export default async function NegocioLayout({
 }) {
   const supabaseServer = await getSupabaseServer();
   const {
-    data: { session },
-  } = await supabaseServer.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabaseServer.auth.getUser();
 
-  if (!session) {
+  if (userError || !user) {
     redirect("/login");
   }
 
   const { data: roleData } = await supabaseServer
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", session.user.id)
-    .single();
+    .rpc("get_user_role", { user_uuid: user.id });
 
-  const role = roleData?.role;
+  const role = (roleData as string) ?? "usuario";
 
   if (role === "admin") {
     redirect("/admin");

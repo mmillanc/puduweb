@@ -21,18 +21,22 @@ function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (signInError) {
-      setError(signInError.message);
-      setLoading(false);
-      return;
-    }
+      if (signInError) {
+        setError(signInError.message);
+        return;
+      }
 
-    if (data.user) {
+      if (!data.user) {
+        setError("No se pudo iniciar sesión. Intenta de nuevo.");
+        return;
+      }
+
       const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: data.user.id });
 
@@ -41,19 +45,22 @@ function LoginForm() {
       }
 
       const role = (roleData as string) ?? "usuario";
-      console.log("User role:", role, "for user:", data.user.id);
+      console.log("Login exitoso - role:", role, "user:", data.user.id);
+
+      setLoading(false);
 
       if (role === "admin") {
-        router.push("/admin");
+        router.replace("/admin");
       } else if (role === "negocio") {
-        router.push("/negocio");
+        router.replace("/negocio");
       } else {
-        router.push("/");
+        router.replace("/");
       }
-      router.refresh();
-    } else {
-      router.push("/");
-      router.refresh();
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Ocurrió un error inesperado. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   }
 

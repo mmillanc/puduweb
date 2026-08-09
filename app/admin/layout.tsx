@@ -14,15 +14,31 @@ export default function AdminLayout({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    async function checkAccess() {
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout>;
+
+    async function checkAccess(retries = 0) {
       const { data } = await supabase.auth.getSession();
+      
+      if (cancelled) return;
+
       if (!data.session) {
+        if (retries < 2) {
+          retryTimer = setTimeout(() => checkAccess(retries + 1), 800);
+          return;
+        }
         router.replace("/login");
         return;
       }
 
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: data.session.user.id });
+
+      if (cancelled) return;
+
+      if (roleError) {
+        console.error("Admin layout role error:", roleError);
+      }
 
       const role = (roleData as string) ?? "usuario";
 
@@ -38,6 +54,11 @@ export default function AdminLayout({
       setChecking(false);
     }
     checkAccess();
+    
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimer);
+    };
   }, [router]);
 
   if (checking) {

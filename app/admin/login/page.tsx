@@ -17,18 +17,22 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
+      if (error) {
+        setError(error.message);
+        return;
+      }
 
-    if (data.user) {
+      if (!data.user) {
+        setError("No se pudo iniciar sesión.");
+        return;
+      }
+
       const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: data.user.id });
 
@@ -37,18 +41,22 @@ export default function LoginPage() {
       }
 
       const role = (roleData as string) ?? "usuario";
+      console.log("Admin login - role:", role, "user:", data.user.id);
+
+      setLoading(false);
 
       if (role === "admin") {
-        router.push("/admin");
+        router.replace("/admin");
       } else if (role === "negocio") {
-        router.push("/negocio");
+        router.replace("/negocio");
       } else {
-        router.push("/");
+        router.replace("/");
       }
-      router.refresh();
-    } else {
-      router.push("/");
-      router.refresh();
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Ocurrió un error inesperado.");
+    } finally {
+      setLoading(false);
     }
   }
 
