@@ -22,12 +22,9 @@ export default function AdminLayout({
       }
 
       const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.session.user.id)
-        .single();
+        .rpc("get_user_role", { user_uuid: data.session.user.id });
 
-      const role = roleData?.role;
+      const role = (roleData as string) ?? "usuario";
 
       if (role === "negocio") {
         router.replace("/negocio");

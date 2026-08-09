@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
-import { Menu, X, ChevronDown, User } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { RoleType } from "@/lib/types";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlobalSearch } from "@/components/global-search";
 
 export function Navbar() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState<RoleType | null>(null);
 
@@ -20,6 +23,7 @@ export function Navbar() {
       if (data.session?.user) {
         fetchRole(data.session.user.id);
       }
+      setAuthChecked(true);
     });
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -29,6 +33,7 @@ export function Navbar() {
         } else {
           setRole(null);
         }
+        setAuthChecked(true);
       }
     );
     return () => listener.subscription.unsubscribe();
@@ -36,11 +41,16 @@ export function Navbar() {
 
   async function fetchRole(userId: string) {
     const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .single();
-    setRole((data?.role as RoleType) ?? "usuario");
+      .rpc("get_user_role", { user_uuid: userId });
+    setRole((data as RoleType) ?? "usuario");
+  }
+
+  function handleLogout() {
+    supabase.auth.signOut().then(() => {
+      setUserMenuOpen(false);
+      router.push("/");
+      router.refresh();
+    });
   }
 
   function getDashboardLink() {
@@ -98,49 +108,70 @@ export function Navbar() {
               {dashboard.label}
             </Link>
           )}
-          {isLoggedIn && !dashboard && (
-            <Link
-              href="/favoritos"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Favoritos
-            </Link>
-          )}
         </nav>
 
         <div className="flex items-center gap-2">
           <GlobalSearch />
           <ThemeToggle />
-          {!isLoggedIn && (
-            <div className="relative hidden lg:block">
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-              >
-                <User size={16} />
-                Usuario
-                <ChevronDown size={14} className={`transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
-              </button>
-              {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border bg-card shadow-lg">
+          <div className="relative hidden lg:block">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+            >
+              <User size={16} />
+              {isLoggedIn ? "Mi cuenta" : "Usuario"}
+              <ChevronDown size={14} className={`transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+            {userMenuOpen && !isLoggedIn && (
+              <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border bg-card shadow-lg">
+                <Link
+                  href="/login"
+                  className="block px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                  onClick={() => setUserMenuOpen(false)}
+                >
+                  Iniciar sesión
+                </Link>
+                <Link
+                  href="/registro"
+                  className="block px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                  onClick={() => setUserMenuOpen(false)}
+                >
+                  Registrarse
+                </Link>
+              </div>
+            )}
+            {userMenuOpen && isLoggedIn && (
+              <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border bg-card shadow-lg">
+                {dashboard && (
                   <Link
-                    href="/login"
-                    className="block px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                    href={dashboard.href}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
                     onClick={() => setUserMenuOpen(false)}
                   >
-                    Iniciar sesión
+                    <LayoutDashboard size={14} />
+                    {dashboard.label}
                   </Link>
+                )}
+                {!dashboard && (
                   <Link
-                    href="/registro"
-                    className="block px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                    href="/favoritos"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
                     onClick={() => setUserMenuOpen(false)}
                   >
-                    Registrarse
+                    <Heart size={14} />
+                    Favoritos
                   </Link>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+                >
+                  <LogOut size={14} />
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
           <button
             className="lg:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -194,6 +225,15 @@ export function Navbar() {
                   Registrarse
                 </Link>
               </>
+            )}
+            {isLoggedIn && (
+              <button
+                onClick={() => { handleLogout(); setMenuOpen(false); }}
+                className="flex items-center gap-2 text-left text-sm font-medium text-red-500"
+              >
+                <LogOut size={16} />
+                Cerrar sesión
+              </button>
             )}
           </div>
         </nav>

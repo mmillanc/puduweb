@@ -29,13 +29,14 @@ export default function LoginPage() {
     }
 
     if (data.user) {
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .single();
+      const { data: roleData, error: roleError } = await supabase
+        .rpc("get_user_role", { user_uuid: data.user.id });
 
-      const role = roleData?.role;
+      if (roleError) {
+        console.error("Error fetching role:", roleError);
+      }
+
+      const role = (roleData as string) ?? "usuario";
 
       if (role === "admin") {
         router.push("/admin");
