@@ -37,17 +37,35 @@ function LoginForm() {
         return;
       }
 
-      const { data: roleData, error: roleError } = await supabase
+      // Intentar obtener rol via RPC (security definer, bypassa RLS)
+      let role: string | null = null;
+      const { data: rpcData, error: rpcError } = await supabase
         .rpc("get_user_role", { user_uuid: data.user.id });
 
-      if (roleError) {
-        console.error("Error fetching role:", roleError);
+      if (rpcError) {
+        console.error("RPC get_user_role error:", rpcError);
+        // Fallback: intentar query directa
+        const { data: directData, error: directError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .single();
+
+        if (directError) {
+          console.error("Direct query error:", directError);
+        }
+        role = directData?.role ?? null;
+      } else {
+        role = rpcData as string;
       }
 
-      const role = (roleData as string) ?? "usuario";
       console.log("Login exitoso - role:", role, "user:", data.user.id);
 
-      setLoading(false);
+      if (!role) {
+        // Si no se pudo obtener rol, redirigir a home igualmente
+        router.replace("/");
+        return;
+      }
 
       if (role === "admin") {
         router.replace("/admin");
@@ -58,7 +76,7 @@ function LoginForm() {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Ocurrió un error inesperado. Intenta de nuevo.");
+      setError(err instanceof Error ? err.message : "Ocurrió un error inesperado.");
     } finally {
       setLoading(false);
     }
