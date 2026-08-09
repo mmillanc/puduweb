@@ -61,18 +61,20 @@ function LoginForm() {
 
       console.log("Login exitoso - role:", role, "user:", data.user.id);
 
+      // Pequeña espera para asegurar que la sesión se persista en localStorage
+      await new Promise((r) => setTimeout(r, 300));
+
       if (!role) {
-        // Si no se pudo obtener rol, redirigir a home igualmente
-        router.replace("/");
+        window.location.href = "/";
         return;
       }
 
       if (role === "admin") {
-        router.replace("/admin");
+        window.location.href = "/admin";
       } else if (role === "negocio") {
-        router.replace("/negocio");
+        window.location.href = "/negocio";
       } else {
-        router.replace("/");
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Login error:", err);
