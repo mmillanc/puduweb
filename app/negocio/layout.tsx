@@ -19,13 +19,10 @@ export default function NegocioLayout({
 
     async function handleSession(session: { user: { id: string } } | null) {
       if (settled) return;
+      if (!session) return; // No redirigir inmediatamente si es null
+
       settled = true;
       clearTimeout(timeoutId);
-
-      if (!session) {
-        router.replace("/login");
-        return;
-      }
 
       const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: session.user.id });
@@ -35,6 +32,7 @@ export default function NegocioLayout({
       }
 
       const role = (roleData as string) ?? "usuario";
+      console.log("Negocio layout - session found, role:", role);
 
       if (role === "admin") {
         router.replace("/admin");
@@ -48,29 +46,34 @@ export default function NegocioLayout({
       setChecking(false);
     }
 
-    // 1. Try getSession immediately (works if session already in memory)
+    // 1. Try getSession immediately
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        handleSession(session);
-      }
-      // If null, wait for onAuthStateChange to fire INITIAL_SESSION
+      handleSession(session);
     });
 
-    // 2. Listen for INITIAL_SESSION event (fires when session loaded from storage)
+    // 2. Listen for session events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+        console.log("Negocio layout - auth event:", event, "has session:", !!session);
+        if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           handleSession(session);
         }
       }
     );
 
-    // 3. Fallback: after 5s, try getSession one more time
+    // 3. Only redirect to /login after 3s if no session found
     timeoutId = setTimeout(async () => {
       if (settled) return;
+      // Último intento
       const { data: { session } } = await supabase.auth.getSession();
-      handleSession(session);
-    }, 5000);
+      if (session) {
+        handleSession(session);
+      } else {
+        console.log("Negocio layout - no session after 3s, redirecting to /login");
+        settled = true;
+        router.replace("/login");
+      }
+    }, 3000);
 
     return () => {
       settled = true;

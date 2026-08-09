@@ -19,13 +19,10 @@ export default function AdminLayout({
 
     async function handleSession(session: { user: { id: string } } | null) {
       if (settled) return;
+      if (!session) return;
+
       settled = true;
       clearTimeout(timeoutId);
-
-      if (!session) {
-        router.replace("/login");
-        return;
-      }
 
       const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: session.user.id });
@@ -35,6 +32,7 @@ export default function AdminLayout({
       }
 
       const role = (roleData as string) ?? "usuario";
+      console.log("Admin layout - session found, role:", role);
 
       if (role === "negocio") {
         router.replace("/negocio");
@@ -49,14 +47,13 @@ export default function AdminLayout({
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        handleSession(session);
-      }
+      handleSession(session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+        console.log("Admin layout - auth event:", event, "has session:", !!session);
+        if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           handleSession(session);
         }
       }
@@ -65,8 +62,14 @@ export default function AdminLayout({
     timeoutId = setTimeout(async () => {
       if (settled) return;
       const { data: { session } } = await supabase.auth.getSession();
-      handleSession(session);
-    }, 5000);
+      if (session) {
+        handleSession(session);
+      } else {
+        console.log("Admin layout - no session after 3s, redirecting to /login");
+        settled = true;
+        router.replace("/login");
+      }
+    }, 3000);
 
     return () => {
       settled = true;
