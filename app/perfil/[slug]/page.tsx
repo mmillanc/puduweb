@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { supabaseServer } from "@/lib/supabase-server";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { Profile } from "@/lib/types";
 import { ReviewsSection } from "@/components/reviews-section";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -38,11 +38,16 @@ const typeConfig = {
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const { data } = await supabaseServer
-    .from("profiles")
-    .select("slug")
-    .eq("is_published", true);
-  return (data ?? []).map((p) => ({ slug: p.slug }));
+  try {
+    const supabaseServer = getSupabaseServerClient();
+    const { data } = await supabaseServer
+      .from("profiles")
+      .select("slug")
+      .eq("is_published", true);
+    return (data ?? []).map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -51,6 +56,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const supabaseServer = getSupabaseServerClient();
   const { data } = await supabaseServer
     .from("profiles")
     .select("*, category:categories(*)")
@@ -98,6 +104,7 @@ export default async function ProfileDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const supabaseServer = getSupabaseServerClient();
   const { data } = await supabaseServer
     .from("profiles")
     .select("*, category:categories(*)")

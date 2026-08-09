@@ -1,10 +1,17 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+function getEnvOrThrow() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error("Faltan variables de entorno de Supabase");
+  }
+  return { url, key };
+}
 
-export async function getSupabaseServer() {
+export async function getSupabaseServer(): Promise<SupabaseClient> {
+  const { url, key } = getEnvOrThrow();
   const cookieStore = await cookies();
   const authCookies = cookieStore
     .getAll()
@@ -14,7 +21,7 @@ export async function getSupabaseServer() {
     c.name.includes("auth-token")
   )?.value;
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient(url, key, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -27,6 +34,14 @@ export async function getSupabaseServer() {
   });
 }
 
-export const supabaseServer = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: { persistSession: false },
-});
+let _supabaseServer: SupabaseClient | null = null;
+
+export function getSupabaseServerClient(): SupabaseClient {
+  if (!_supabaseServer) {
+    const { url, key } = getEnvOrThrow();
+    _supabaseServer = createClient(url, key, {
+      auth: { persistSession: false },
+    });
+  }
+  return _supabaseServer;
+}
