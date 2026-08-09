@@ -145,8 +145,46 @@ export default async function ProfileDetailPage({
     ? profile.services.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const profileUrl = `${baseUrl}/perfil/${profile.slug}`;
+
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": profile.type === "pyme" ? "LocalBusiness" : "ProfessionalService",
+    name: profile.name,
+    description: profile.description ?? profile.tagline ?? "",
+    url: profileUrl,
+    ...(profile.avatar_url && { image: profile.avatar_url }),
+    ...(profile.phone && { telephone: profile.phone }),
+    ...(profile.email && { email: profile.email }),
+    ...(profile.website && { sameAs: [profile.website] }),
+    ...(profile.address && {
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: profile.address,
+        addressLocality: profile.city ?? "",
+        addressRegion: profile.region ?? "",
+        addressCountry: "CL",
+      },
+    }),
+    ...(profile.city && {
+      areaServed: profile.city,
+    }),
+    ...(services.length > 0 && { makesOffer: services.map((s) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: s } })) }),
+    ...(profile.hours && { openingHours: profile.hours }),
+  };
+
+  const socialLinks = [profile.instagram, profile.facebook, profile.linkedin, profile.twitter, profile.whatsapp].filter(Boolean);
+  if (socialLinks.length > 0) {
+    jsonLd.sameAs = [...(jsonLd.sameAs as string[] ?? []), ...socialLinks];
+  }
+
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
         <Breadcrumbs
           items={[

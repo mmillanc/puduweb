@@ -115,8 +115,28 @@ export default async function CategoryPage({
 
   const profiles = (profilesData as Profile[]) ?? [];
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${category.name} - Directorio PuduWeb`,
+    description: `Directorio de profesionales, pymes y vendedores en la categoría ${category.name}. Encuentra servicios cerca de ti.`,
+    url: `${baseUrl}/categoria/${category.slug}`,
+    hasPart: profiles.map((p) => ({
+      "@type": "LocalBusiness",
+      name: p.name,
+      url: `${baseUrl}/perfil/${p.slug}`,
+      ...(p.city && { address: { "@type": "PostalAddress", addressLocality: p.city, addressCountry: "CL" } }),
+    })),
+  };
+
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <section className="border-b bg-gradient-to-br from-primary/10 via-background to-background">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">

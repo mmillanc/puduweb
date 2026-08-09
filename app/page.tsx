@@ -140,7 +140,7 @@ function HomeContent() {
                   href="/registro"
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition"
                 >
-                  Crear perfil gratis
+                  Crear perfil
                   <ArrowRight size={16} />
                 </a>
                 <a
@@ -151,9 +151,9 @@ function HomeContent() {
                 </a>
               </div>
               <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> 100% gratis</span>
                 <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Sin comisiones</span>
                 <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Métricas incluidas</span>
+                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Contacto directo</span>
               </div>
             </div>
             <div className="relative">
@@ -425,14 +425,14 @@ function HomeContent() {
         <div className="rounded-3xl bg-gradient-to-r from-primary to-blue-600 p-8 sm:p-12 text-center text-white">
           <h2 className="text-2xl font-bold sm:text-3xl">¿Listo para destacar?</h2>
           <p className="mt-3 text-white/90">
-            Crea tu perfil gratis y empieza a recibir clientes hoy mismo.
+            Crea tu perfil y empieza a recibir clientes hoy mismo.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
             <a
               href="/registro"
               className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-primary hover:bg-white/90 transition"
             >
-              Registrarse gratis
+              Registrarse
               <ArrowRight size={16} />
             </a>
             <a

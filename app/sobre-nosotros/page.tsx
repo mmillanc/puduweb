@@ -131,7 +131,7 @@ export default function AboutPage() {
             href="/registro"
             className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-primary hover:bg-white/90 transition"
           >
-            Registrarse gratis
+            Registrarse
             <ArrowRight size={16} />
           </Link>
         </div>
