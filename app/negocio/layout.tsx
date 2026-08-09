@@ -14,27 +14,21 @@ export default function NegocioLayout({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    let retryTimer: ReturnType<typeof setTimeout>;
+    let settled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
-    async function checkAccess(retries = 0) {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (cancelled) return;
+    async function handleSession(session: { user: { id: string } } | null) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
 
       if (!session) {
-        if (retries < 2) {
-          retryTimer = setTimeout(() => checkAccess(retries + 1), 800);
-          return;
-        }
         router.replace("/login");
         return;
       }
 
       const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: session.user.id });
-
-      if (cancelled) return;
 
       if (roleError) {
         console.error("Negocio layout role error:", roleError);
@@ -53,11 +47,35 @@ export default function NegocioLayout({
 
       setChecking(false);
     }
-    checkAccess();
+
+    // 1. Try getSession immediately (works if session already in memory)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        handleSession(session);
+      }
+      // If null, wait for onAuthStateChange to fire INITIAL_SESSION
+    });
+
+    // 2. Listen for INITIAL_SESSION event (fires when session loaded from storage)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+          handleSession(session);
+        }
+      }
+    );
+
+    // 3. Fallback: after 5s, try getSession one more time
+    timeoutId = setTimeout(async () => {
+      if (settled) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      handleSession(session);
+    }, 5000);
 
     return () => {
-      cancelled = true;
-      clearTimeout(retryTimer);
+      settled = true;
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
     };
   }, [router]);
 

@@ -14,27 +14,21 @@ export default function AdminLayout({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    let retryTimer: ReturnType<typeof setTimeout>;
+    let settled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
-    async function checkAccess(retries = 0) {
-      const { data } = await supabase.auth.getSession();
-      
-      if (cancelled) return;
+    async function handleSession(session: { user: { id: string } } | null) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
 
-      if (!data.session) {
-        if (retries < 2) {
-          retryTimer = setTimeout(() => checkAccess(retries + 1), 800);
-          return;
-        }
+      if (!session) {
         router.replace("/login");
         return;
       }
 
       const { data: roleData, error: roleError } = await supabase
-        .rpc("get_user_role", { user_uuid: data.session.user.id });
-
-      if (cancelled) return;
+        .rpc("get_user_role", { user_uuid: session.user.id });
 
       if (roleError) {
         console.error("Admin layout role error:", roleError);
@@ -53,11 +47,31 @@ export default function AdminLayout({
 
       setChecking(false);
     }
-    checkAccess();
-    
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        handleSession(session);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+          handleSession(session);
+        }
+      }
+    );
+
+    timeoutId = setTimeout(async () => {
+      if (settled) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      handleSession(session);
+    }, 5000);
+
     return () => {
-      cancelled = true;
-      clearTimeout(retryTimer);
+      settled = true;
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
     };
   }, [router]);
 
