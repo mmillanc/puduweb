@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
 import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import type { RoleType } from "@/lib/types";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlobalSearch } from "@/components/global-search";
@@ -14,6 +15,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState<RoleType | null>(null);
 
@@ -37,6 +39,16 @@ export function Navbar() {
       }
     );
     return () => listener.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   async function fetchRole(userId: string) {
@@ -113,7 +125,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <GlobalSearch />
           <ThemeToggle />
-          <div className="relative hidden lg:block">
+          <div className="relative hidden lg:block" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
@@ -206,22 +218,34 @@ export function Navbar() {
             <Link href="/privacidad" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
               Privacidad
             </Link>
+
+            <div className="my-1 border-t" />
+
+            <div className="flex items-center gap-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <User size={14} />
+              {isLoggedIn ? "Mi cuenta" : "Usuario"}
+            </div>
+
             {dashboard && (
-              <Link href={dashboard.href} className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+              <Link href={dashboard.href} className="flex items-center gap-2 text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+                <LayoutDashboard size={16} />
                 {dashboard.label}
               </Link>
             )}
             {isLoggedIn && !dashboard && (
-              <Link href="/favoritos" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+              <Link href="/favoritos" className="flex items-center gap-2 text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+                <Heart size={16} />
                 Favoritos
               </Link>
             )}
             {!isLoggedIn && (
               <>
-                <Link href="/login" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+                <Link href="/login" className="flex items-center gap-2 text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+                  <User size={16} />
                   Iniciar sesión
                 </Link>
-                <Link href="/registro" className="rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-white" onClick={() => setMenuOpen(false)}>
+                <Link href="/registro" className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white" onClick={() => setMenuOpen(false)}>
+                  <User size={16} />
                   Registrarse
                 </Link>
               </>
