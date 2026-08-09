@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { Profile } from "@/lib/types";
 import { ReviewsSection } from "@/components/reviews-section";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -39,6 +38,7 @@ export const revalidate = 3600;
 
 export async function generateStaticParams() {
   try {
+    const { getSupabaseServerClient } = await import("@/lib/supabase-server");
     const supabaseServer = getSupabaseServerClient();
     const { data } = await supabaseServer
       .from("profiles")
@@ -56,6 +56,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
   const { data } = await supabaseServer
     .from("profiles")
@@ -104,6 +105,7 @@ export default async function ProfileDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
   const { data } = await supabaseServer
     .from("profiles")

@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { Profile, Category } from "@/lib/types";
 import { ProfileCard } from "@/components/profile-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -42,6 +41,7 @@ export const revalidate = 3600;
 
 export async function generateStaticParams() {
   try {
+    const { getSupabaseServerClient } = await import("@/lib/supabase-server");
     const supabaseServer = getSupabaseServerClient();
     const { data } = await supabaseServer.from("categories").select("slug");
     return (data ?? []).map((c) => ({ slug: c.slug }));
@@ -56,6 +56,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
   const { data } = await supabaseServer
     .from("categories")
@@ -90,6 +91,7 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
   const { data: catData } = await supabaseServer
     .from("categories")

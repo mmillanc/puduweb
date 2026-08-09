@@ -1,4 +1,3 @@
-import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { Category } from "@/lib/types";
 import Link from "next/link";
 import {
@@ -33,6 +32,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default async function CategoriesPage() {
+  const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
   const { data: categories } = await supabaseServer
     .from("categories")
