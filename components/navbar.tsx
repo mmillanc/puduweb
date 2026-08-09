@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, User } from "lucide-react";
 import type { RoleType } from "@/lib/types";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlobalSearch } from "@/components/global-search";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState<RoleType | null>(null);
 
@@ -112,19 +112,33 @@ export function Navbar() {
           <GlobalSearch />
           <ThemeToggle />
           {!isLoggedIn && (
-            <div className="hidden items-center gap-2 lg:flex">
-              <Link
-                href="/login"
-                className="text-sm font-medium hover:text-primary transition-colors"
+            <div className="relative hidden lg:block">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
               >
-                Iniciar sesión
-              </Link>
-              <Link
-                href="/registro"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
-              >
-                Registrarse
-              </Link>
+                <User size={16} />
+                Usuario
+                <ChevronDown size={14} className={`transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border bg-card shadow-lg">
+                  <Link
+                    href="/login"
+                    className="block px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Iniciar sesión
+                  </Link>
+                  <Link
+                    href="/registro"
+                    className="block px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Registrarse
+                  </Link>
+                </div>
+              )}
             </div>
           )}
           <button

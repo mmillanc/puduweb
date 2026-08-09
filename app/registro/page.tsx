@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import { slugify } from "@/lib/utils";
 import {
   isValidEmail,
   isValidPhone,
@@ -111,6 +110,23 @@ export default function RegisterPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          role,
+          ...(role === "negocio" && {
+            biz_name: bizName,
+            biz_type: bizType,
+            biz_category_id: bizCategoryId,
+            biz_tagline: bizTagline,
+            biz_description: bizDescription,
+            biz_city: bizCity,
+            biz_phone: bizPhone,
+            biz_website: bizWebsite,
+            biz_instagram: bizInstagram,
+            biz_whatsapp: bizWhatsapp,
+          }),
+        },
+      },
     });
 
     if (signUpError) {
@@ -123,63 +139,6 @@ export default function RegisterPage() {
       setError("No se pudo crear la cuenta");
       setLoading(false);
       return;
-    }
-
-    const userId = data.user.id;
-
-    const { error: roleError } = await supabase
-      .from("user_roles")
-      .insert({ user_id: userId, role });
-
-    if (roleError) {
-      console.error("Error asignando rol:", roleError.message);
-    }
-
-    if (role === "negocio") {
-      const slug = slugify(bizName);
-
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          name: bizName,
-          slug,
-          type: bizType,
-          category_id: bizCategoryId,
-          tagline: bizTagline || null,
-          description: bizDescription || null,
-          city: bizCity || null,
-          phone: bizPhone || null,
-          email: email,
-          website: bizWebsite || null,
-          instagram: bizInstagram || null,
-          whatsapp: bizWhatsapp || null,
-          is_published: false,
-          featured: false,
-        })
-        .select("id")
-        .single();
-
-      if (profileError) {
-        console.error("Error creando perfil:", profileError.message);
-        setError(
-          "Cuenta creada pero hubo un error al crear el perfil. Puedes completarlo desde tu panel."
-        );
-        setLoading(false);
-        return;
-      }
-
-      if (profileData) {
-        const { error: ownerError } = await supabase
-          .from("profile_owners")
-          .insert({
-            profile_id: profileData.id,
-            user_id: userId,
-          });
-
-        if (ownerError) {
-          console.error("Error asignando ownership:", ownerError.message);
-        }
-      }
     }
 
     setLoading(false);
