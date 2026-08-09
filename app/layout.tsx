@@ -36,6 +36,10 @@ export const metadata: Metadata = {
     "constructor",
   ],
   authors: [{ name: "PuduWeb" }],
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     type: "website",
     locale: "es_CL",

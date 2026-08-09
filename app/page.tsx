@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
 import { ProfileCard } from "@/components/profile-card";
 import type { Profile, Category } from "@/lib/types";
-import { Search, Filter, Loader2, Inbox, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Filter, Loader2, Inbox, ChevronLeft, ChevronRight, Store, Users, Star, MessageSquare, TrendingUp, ShieldCheck, ArrowRight, CheckCircle2, Eye, Mail, X, BarChart3, MapPin, Heart } from "lucide-react";
 
 const typeLabels: Record<string, string> = {
   profesional: "Profesional",
@@ -118,39 +118,351 @@ function HomeContent() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-background border-b">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-          <h1 className="mb-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            Encuentra profesionales y pymes{" "}
-            <span className="text-primary">cerca de ti</span>
-          </h1>
-          <p className="mb-8 max-w-2xl text-lg text-muted-foreground">
-            Directorio local de profesionales, pymes y vendedores. Busca por
-            categoría, ubicación o nombre.
-          </p>
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/5 via-background to-background">
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+            <div>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
+                <span className="flex h-2 w-2 rounded-full bg-green-500" />
+                Directorio local de Chile
+              </div>
+              <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                El directorio que{" "}
+                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">conecta</span>{" "}
+                talento local con clientes
+              </h1>
+              <p className="mb-8 max-w-xl text-lg text-muted-foreground">
+                Publica tu perfil, recibe reseñas, gestiona mensajes y mide tu alcance. Todo desde un solo panel. Sin comisiones, sin intermediarios.
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <a
+                  href="/registro"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition"
+                >
+                  Crear perfil gratis
+                  <ArrowRight size={16} />
+                </a>
+                <a
+                  href="#directorio"
+                  className="inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold hover:bg-muted transition"
+                >
+                  Explorar directorio
+                </a>
+              </div>
+              <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> 100% gratis</span>
+                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Sin comisiones</span>
+                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Métricas incluidas</span>
+              </div>
+            </div>
+            <div className="relative">
+              {/* TODO: Reemplazar con screenshot real del dashboard */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
+                alt="Dashboard de PuduWeb"
+                className="rounded-2xl border shadow-2xl"
+              />
+              <div className="absolute -bottom-4 -left-4 rounded-xl border bg-card p-3 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600">
+                    <TrendingUp size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold">+24% visitas</p>
+                    <p className="text-xs text-muted-foreground">este mes</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          {/* Search bar */}
-          <div className="relative max-w-2xl">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-              size={20}
+      {/* Problem / Solution */}
+      <section className="border-b bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <h2 className="text-3xl font-bold">Más que un directorio</h2>
+            <p className="mt-3 text-muted-foreground">
+              No solo listamos perfiles. Damos las herramientas para que profesionales y pymes crezcan.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-2xl border bg-card p-8">
+              <div className="mb-4 flex items-center gap-2">
+                <X className="text-red-500" size={20} />
+                <h3 className="font-semibold">Lo que hacen la mayoría de los directorios</h3>
+              </div>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Solo una lista de nombres</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Sin reseñas ni social proof</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> No puedes contactar directamente</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Sin métricas ni datos</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Perfiles estáticos sin vida</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border bg-primary/5 p-8">
+              <div className="mb-4 flex items-center gap-2">
+                <CheckCircle2 className="text-green-500" size={20} />
+                <h3 className="font-semibold">Lo que hace PuduWeb</h3>
+              </div>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Perfiles con fotos, redes y servicios</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Reseñas reales de clientes</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Mensajes directos sin intermediarios</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Métricas de visitas y mensajes</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Favoritos y perfil destacado</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature blocks alternating image/text */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <h2 className="text-3xl font-bold">De perfil básico a presencia completa</h2>
+          <p className="mt-3 text-muted-foreground">
+            Todo lo que necesitas para destacar y crecer.
+          </p>
+        </div>
+
+        {/* Block 1: image left, text right */}
+        <div className="grid grid-cols-1 items-center gap-12 py-10 lg:grid-cols-2">
+          <div className="relative">
+            {/* TODO: Reemplazar con screenshot real */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&h=500&fit=crop"
+              alt="Panel de métricas"
+              className="rounded-2xl border shadow-lg"
             />
+          </div>
+          <div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <BarChart3 size={24} />
+            </div>
+            <h3 className="mb-3 text-xl font-bold">Métricas que importan</h3>
+            <p className="mb-4 text-muted-foreground">
+              Visualiza cuántas visitas recibe tu perfil, cuántos mensajes te han enviado y cómo crece tu presencia mes a mes.
+            </p>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Contador de visitas en tiempo real</li>
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Bandeja de mensajes de contacto</li>
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Reseñas y calificaciones</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Block 2: text left, image right */}
+        <div className="grid grid-cols-1 items-center gap-12 py-10 lg:grid-cols-2">
+          <div className="order-2 lg:order-1">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Search size={24} />
+            </div>
+            <h3 className="mb-3 text-xl font-bold">Búsqueda que encuentra</h3>
+            <p className="mb-4 text-muted-foreground">
+              Filtra por categoría, ciudad o tipo de servicio. Tus clientes te encuentran cuando te necesitan, no por casualidad.
+            </p>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Filtros por categoría y ubicación</li>
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Búsqueda por nombre o servicio</li>
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Perfiles destacados primero</li>
+            </ul>
+          </div>
+          <div className="order-1 lg:order-2 relative">
+            {/* TODO: Reemplazar con screenshot real */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=700&h=500&fit=crop"
+              alt="Búsqueda de perfiles"
+              className="rounded-2xl border shadow-lg"
+            />
+          </div>
+        </div>
+
+        {/* Block 3: image left, text right */}
+        <div className="grid grid-cols-1 items-center gap-12 py-10 lg:grid-cols-2">
+          <div className="relative">
+            {/* TODO: Reemplazar con screenshot real */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=700&h=500&fit=crop"
+              alt="Perfil profesional"
+              className="rounded-2xl border shadow-lg"
+            />
+          </div>
+          <div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Store size={24} />
+            </div>
+            <h3 className="mb-3 text-xl font-bold">Tu vitrina online</h3>
+            <p className="mb-4 text-muted-foreground">
+              Crea un perfil completo con fotos, redes sociales, horarios, descripción de servicios y datos de contacto. Todo en un solo lugar.
+            </p>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Fotos y logo de tu negocio</li>
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Instagram, WhatsApp y web</li>
+              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Publica o despublica cuando quieras</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature grid with bullets */}
+      <section className="border-y bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <h2 className="text-3xl font-bold">Todo lo que necesitas en un solo lugar</h2>
+            <p className="mt-3 text-muted-foreground">
+              Una plataforma completa para gestionar tu presencia online.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Star size={20} />
+              </div>
+              <h3 className="mb-2 font-semibold">Reseñas auténticas</h3>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Calificaciones con estrellas</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Comentarios de clientes</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Construye reputación</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <MessageSquare size={20} />
+              </div>
+              <h3 className="mb-2 font-semibold">Mensajes directos</h3>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Bandeja de entrada</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Marcar como leído</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Sin intermediarios</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <MapPin size={20} />
+              </div>
+              <h3 className="mb-2 font-semibold">Cercanía local</h3>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Filtra por ciudad</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> 12 categorías</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Profesionales, pymes y vendedores</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Heart size={20} />
+              </div>
+              <h3 className="mb-2 font-semibold">Favoritos</h3>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Guarda perfiles</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Acceso rápido</li>
+                <li className="flex items-start gap-1.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-500" /> Lista personalizada</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Target audience */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <h2 className="text-3xl font-bold">Para todos los talentos locales</h2>
+          <p className="mt-3 text-muted-foreground">
+            Sea cual sea tu rubro, PuduWeb te ayuda a crecer.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="rounded-2xl border bg-card p-8 text-center transition hover:shadow-md">
+            {/* TODO: Reemplazar con imagen real */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=200&fit=crop"
+              alt="Profesional"
+              className="mb-4 rounded-xl"
+            />
+            <h3 className="mb-2 font-semibold">Profesionales</h3>
+            <p className="text-sm text-muted-foreground">
+              Kinesiólogos, abogados, arquitectos, contadores. Muestra tu experiencia y atrae nuevos clientes.
+            </p>
+          </div>
+          <div className="rounded-2xl border bg-card p-8 text-center transition hover:shadow-md">
+            {/* TODO: Reemplazar con imagen real */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=200&fit=crop"
+              alt="Pyme"
+              className="mb-4 rounded-xl"
+            />
+            <h3 className="mb-2 font-semibold">Pymes</h3>
+            <p className="text-sm text-muted-foreground">
+              Restaurantes, ferreterías, tiendas, talleres. Tu vitrina online con fotos, horarios y contacto.
+            </p>
+          </div>
+          <div className="rounded-2xl border bg-card p-8 text-center transition hover:shadow-md">
+            {/* TODO: Reemplazar con imagen real */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop"
+              alt="Vendedor"
+              className="mb-4 rounded-xl"
+            />
+            <h3 className="mb-2 font-semibold">Vendedores</h3>
+            <p className="text-sm text-muted-foreground">
+              Vendedores independientes y emprendedores. Crea tu perfil y conecta con quienes buscan tus productos.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA banner */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="rounded-3xl bg-gradient-to-r from-primary to-blue-600 p-8 sm:p-12 text-center text-white">
+          <h2 className="text-2xl font-bold sm:text-3xl">¿Listo para destacar?</h2>
+          <p className="mt-3 text-white/90">
+            Crea tu perfil gratis y empieza a recibir clientes hoy mismo.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            <a
+              href="/registro"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-primary hover:bg-white/90 transition"
+            >
+              Registrarse gratis
+              <ArrowRight size={16} />
+            </a>
+            <a
+              href="/sobre-nosotros"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition"
+            >
+              Saber más
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Directory */}
+      <section id="directorio" className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold">Explorar directorio</h2>
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Search size={16} />
             <input
               type="text"
-              placeholder="Buscar por nombre, servicio o ciudad..."
+              placeholder="Buscar..."
               value={searchInput}
               onChange={(e) => {
                 setSearchInput(e.target.value);
                 setDebouncedSearch(e.target.value);
               }}
-              className="w-full rounded-full border bg-background py-3 pl-12 pr-4 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
+              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
-      </section>
-
-      {/* Filters + Grid */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Filter size={16} />
@@ -271,7 +583,7 @@ function HomeContent() {
             )}
           </>
         )}
-      </section>
+        </section>
     </div>
   );
 }

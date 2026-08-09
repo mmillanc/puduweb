@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import type { RoleType } from "@/lib/types";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlobalSearch } from "@/components/global-search";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState<RoleType | null>(null);
 
@@ -54,10 +55,11 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold text-primary">PuduWeb</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="PuduWeb" className="h-12 w-auto" />
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-5 lg:flex">
           <Link
             href="/"
             className="text-sm font-medium hover:text-primary transition-colors"
@@ -70,22 +72,47 @@ export function Navbar() {
           >
             Categorías
           </Link>
-          {dashboard ? (
+          <Link
+            href="/sobre-nosotros"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            Sobre nosotros
+          </Link>
+          <Link
+            href="/faq"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            FAQ
+          </Link>
+          <Link
+            href="/contacto"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            Contacto
+          </Link>
+          {dashboard && (
             <Link
               href={dashboard.href}
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               {dashboard.label}
             </Link>
-          ) : isLoggedIn ? (
+          )}
+          {isLoggedIn && !dashboard && (
             <Link
               href="/favoritos"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Favoritos
             </Link>
-          ) : (
-            <>
+          )}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <GlobalSearch />
+          <ThemeToggle />
+          {!isLoggedIn && (
+            <div className="hidden items-center gap-2 lg:flex">
               <Link
                 href="/login"
                 className="text-sm font-medium hover:text-primary transition-colors"
@@ -98,15 +125,10 @@ export function Navbar() {
               >
                 Registrarse
               </Link>
-            </>
+            </div>
           )}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <GlobalSearch />
-          <ThemeToggle />
           <button
-            className="md:hidden"
+            className="lg:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
@@ -116,52 +138,45 @@ export function Navbar() {
       </div>
 
       {menuOpen && (
-        <nav className="border-t md:hidden">
-          <div className="flex flex-col gap-4 px-4 py-4">
-            <Link
-              href="/"
-              className="text-sm font-medium hover:text-primary"
-              onClick={() => setMenuOpen(false)}
-            >
+        <nav className="border-t lg:hidden">
+          <div className="flex flex-col gap-3 px-4 py-4">
+            <Link href="/" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
               Inicio
             </Link>
-            <Link
-              href="/categorias"
-              className="text-sm font-medium hover:text-primary"
-              onClick={() => setMenuOpen(false)}
-            >
+            <Link href="/categorias" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
               Categorías
             </Link>
-            {dashboard ? (
-              <Link
-                href={dashboard.href}
-                className="text-sm font-medium hover:text-primary"
-                onClick={() => setMenuOpen(false)}
-              >
+            <Link href="/sobre-nosotros" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+              Sobre nosotros
+            </Link>
+            <Link href="/faq" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+              FAQ
+            </Link>
+            <Link href="/contacto" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+              Contacto
+            </Link>
+            <Link href="/terminos" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+              Términos
+            </Link>
+            <Link href="/privacidad" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
+              Privacidad
+            </Link>
+            {dashboard && (
+              <Link href={dashboard.href} className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
                 {dashboard.label}
               </Link>
-            ) : isLoggedIn ? (
-              <Link
-                href="/favoritos"
-                className="text-sm font-medium hover:text-primary"
-                onClick={() => setMenuOpen(false)}
-              >
+            )}
+            {isLoggedIn && !dashboard && (
+              <Link href="/favoritos" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
                 Favoritos
               </Link>
-            ) : (
+            )}
+            {!isLoggedIn && (
               <>
-                <Link
-                  href="/login"
-                  className="text-sm font-medium hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
+                <Link href="/login" className="text-sm font-medium hover:text-primary" onClick={() => setMenuOpen(false)}>
                   Iniciar sesión
                 </Link>
-                <Link
-                  href="/registro"
-                  className="rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-white"
-                  onClick={() => setMenuOpen(false)}
-                >
+                <Link href="/registro" className="rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-white" onClick={() => setMenuOpen(false)}>
                   Registrarse
                 </Link>
               </>

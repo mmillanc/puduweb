@@ -8,11 +8,17 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-bold">Términos de uso</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Última actualización: {new Date().getFullYear()}
-      </p>
+    <div className="min-h-screen">
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/10 via-background to-background">
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Términos de uso</h1>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Última actualización: {new Date().getFullYear()}
+          </p>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
         <section>
@@ -81,6 +87,7 @@ export default function TermsPage() {
             entrarán en vigor al publicarse en esta página.
           </p>
         </section>
+      </div>
       </div>
     </div>
   );

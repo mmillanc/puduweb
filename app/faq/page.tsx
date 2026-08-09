@@ -52,13 +52,18 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-bold">Preguntas frecuentes</h1>
-      <p className="mt-2 text-muted-foreground">
-        Todo lo que necesitas saber sobre PuduWeb.
-      </p>
+    <div className="min-h-screen">
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/10 via-background to-background">
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Preguntas frecuentes</h1>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+            Todo lo que necesitas saber sobre PuduWeb.
+          </p>
+        </div>
+      </section>
 
-      <div className="mt-8 space-y-3">
+      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+        <div className="space-y-3">
         {faqs.map((faq, i) => (
           <details
             key={i}
@@ -77,14 +82,16 @@ export default function FAQPage() {
         ))}
       </div>
 
-      <div className="mt-12 rounded-xl bg-primary/5 p-6 text-center">
-        <p className="font-medium">¿No encuentras tu respuesta?</p>
-        <Link
-          href="/contacto"
-          className="mt-3 inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white hover:bg-primary-dark"
-        >
-          Contáctanos
-        </Link>
+        <div className="mt-12 rounded-2xl bg-gradient-to-r from-primary to-blue-600 p-8 text-center text-white">
+          <p className="font-medium text-lg">¿No encuentras tu respuesta?</p>
+          <p className="mt-1 text-sm text-white/80">Estamos aquí para ayudarte</p>
+          <Link
+            href="/contacto"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-primary hover:bg-white/90 transition"
+          >
+            Contáctanos
+          </Link>
+        </div>
       </div>
     </div>
   );

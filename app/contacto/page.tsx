@@ -81,14 +81,21 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-bold">Contáctanos</h1>
-      <p className="mt-2 text-muted-foreground">
-        ¿Tienes preguntas, sugerencias o quieres colaborar? Escríbenos.
-      </p>
+    <div className="min-h-screen">
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/10 via-background to-background">
+        <div className="mx-auto max-w-2xl px-4 py-6 text-center sm:px-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/4-contact.png" alt="Contacto" className="mx-auto mb-6 h-36 w-auto rounded-2xl" />
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Contáctanos</h1>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+            ¿Tienes preguntas, sugerencias o quieres colaborar? Escríbenos.
+          </p>
+        </div>
+      </section>
 
-      <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3">
-        <div className="sm:col-span-2">
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          <div className="sm:col-span-2">
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-400">
               {error}
@@ -164,6 +171,7 @@ export default function ContactPage() {
             </p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
