@@ -219,6 +219,16 @@ export default function NegocioDashboard() {
                 className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
+            <button
+              onClick={() => {
+                setEditingProfile(null);
+                setShowForm(true);
+              }}
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+            >
+              <Store size={16} />
+              Crear perfil
+            </button>
           </div>
 
           {loading ? (
