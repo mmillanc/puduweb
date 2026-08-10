@@ -7,4 +7,11 @@ if (!url || !key) {
   throw new Error("Faltan variables de entorno de Supabase");
 }
 
-export const supabase: SupabaseClient = createClient(url, key);
+export const supabase: SupabaseClient = createClient(url, key, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
+  },
+});

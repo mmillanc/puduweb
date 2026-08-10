@@ -17,9 +17,10 @@ export default function NegocioLayout({
     let mounted = true;
     let attempts = 0;
     let usedFallback = false;
+    let resolved = false;
 
-    const interval = setInterval(async () => {
-      if (!mounted) return;
+    async function trySession(): Promise<void> {
+      if (!mounted || resolved) return;
       attempts++;
       console.log(`Negocio layout: attempt ${attempts}`);
 
@@ -48,43 +49,69 @@ export default function NegocioLayout({
       }
 
       if (session) {
-        console.log("Negocio layout: session found for user", session.user.id);
-        clearInterval(interval);
+        await handleSessionFound(session);
+      }
+    }
 
-        const { data: roleData, error: roleError } = await supabase
-          .rpc("get_user_role", { user_uuid: session.user.id });
-        if (!mounted) return;
+    async function handleSessionFound(session: { user: { id: string } }): Promise<void> {
+      if (!mounted || resolved) return;
+      resolved = true;
+      clearInterval(interval);
 
-        if (roleError) {
-          console.error("Negocio layout: role error", roleError);
-        }
+      console.log("Negocio layout: session found for user", session.user.id);
 
-        const role = (roleData as string) ?? "usuario";
-        console.log("Negocio layout: role =", role);
+      const { data: roleData, error: roleError } = await supabase
+        .rpc("get_user_role", { user_uuid: session.user.id });
+      if (!mounted) return;
 
-        if (role === "admin") {
-          router.replace("/admin");
-          return;
-        }
-        if (role !== "negocio") {
-          router.replace("/");
-          return;
-        }
+      if (roleError) {
+        console.error("Negocio layout: role error", roleError);
+      }
 
-        setChecking(false);
+      const role = (roleData as string) ?? "usuario";
+      console.log("Negocio layout: role =", role);
+
+      if (role === "admin") {
+        router.replace("/admin");
+        return;
+      }
+      if (role !== "negocio") {
+        router.replace("/");
         return;
       }
 
+      setChecking(false);
+    }
+
+    // Polling cada 500ms como backup
+    const interval = setInterval(() => {
+      if (!mounted || resolved) return;
       if (attempts >= 10) {
         console.log("Negocio layout: no session after 10 attempts, redirecting to /login");
         clearInterval(interval);
         router.replace("/login");
+        return;
       }
+      trySession();
     }, 500);
+
+    // onAuthStateChange: captura INITIAL_SESSION cuando Supabase carga desde localStorage
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Negocio layout: auth event:", event, !!session);
+        if (session && (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
+          handleSessionFound(session);
+        }
+      }
+    );
+
+    // Intento inmediato
+    trySession();
 
     return () => {
       mounted = false;
       clearInterval(interval);
+      subscription.unsubscribe();
     };
   }, [router]);
 
