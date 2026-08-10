@@ -14,67 +14,76 @@ export default function AdminLayout({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let settled = false;
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let mounted = true;
+    let attempts = 0;
+    let usedFallback = false;
 
-    async function handleSession(session: { user: { id: string } } | null) {
-      if (settled) return;
-      if (!session) return;
+    const interval = setInterval(async () => {
+      if (!mounted) return;
+      attempts++;
+      console.log(`Admin layout: attempt ${attempts}`);
 
-      settled = true;
-      clearTimeout(timeoutId);
+      let { data: { session } } = await supabase.auth.getSession();
 
-      const { data: roleData, error: roleError } = await supabase
-        .rpc("get_user_role", { user_uuid: session.user.id });
-
-      if (roleError) {
-        console.error("Admin layout role error:", roleError);
-      }
-
-      const role = (roleData as string) ?? "usuario";
-      console.log("Admin layout - session found, role:", role);
-
-      if (role === "negocio") {
-        router.replace("/negocio");
-        return;
-      }
-      if (role !== "admin") {
-        router.replace("/");
-        return;
-      }
-
-      setChecking(false);
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Admin layout - auth event:", event, "has session:", !!session);
-        if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-          handleSession(session);
+      if (!session && !usedFallback) {
+        const token = sessionStorage.getItem("puduweb_login_token");
+        const refresh = sessionStorage.getItem("puduweb_login_refresh");
+        if (token && refresh) {
+          console.log("Admin layout: trying sessionStorage fallback");
+          usedFallback = true;
+          const { data: setData, error: setErr } = await supabase.auth.setSession({
+            access_token: token,
+            refresh_token: refresh,
+          });
+          if (setErr) {
+            console.error("Admin layout: setSession error", setErr);
+          } else if (setData.session) {
+            session = setData.session;
+            sessionStorage.removeItem("puduweb_login_token");
+            sessionStorage.removeItem("puduweb_login_refresh");
+            sessionStorage.removeItem("puduweb_login_role");
+          }
         }
       }
-    );
 
-    timeoutId = setTimeout(async () => {
-      if (settled) return;
-      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        handleSession(session);
-      } else {
-        console.log("Admin layout - no session after 3s, redirecting to /login");
-        settled = true;
+        console.log("Admin layout: session found for user", session.user.id);
+        clearInterval(interval);
+
+        const { data: roleData, error: roleError } = await supabase
+          .rpc("get_user_role", { user_uuid: session.user.id });
+        if (!mounted) return;
+
+        if (roleError) {
+          console.error("Admin layout: role error", roleError);
+        }
+
+        const role = (roleData as string) ?? "usuario";
+        console.log("Admin layout: role =", role);
+
+        if (role === "negocio") {
+          router.replace("/negocio");
+          return;
+        }
+        if (role !== "admin") {
+          router.replace("/");
+          return;
+        }
+
+        setChecking(false);
+        return;
+      }
+
+      if (attempts >= 10) {
+        console.log("Admin layout: no session after 10 attempts, redirecting to /login");
+        clearInterval(interval);
         router.replace("/login");
       }
-    }, 3000);
+    }, 500);
 
     return () => {
-      settled = true;
-      clearTimeout(timeoutId);
-      subscription.unsubscribe();
+      mounted = false;
+      clearInterval(interval);
     };
   }, [router]);
 

@@ -14,71 +14,77 @@ export default function NegocioLayout({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    let settled = false;
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let mounted = true;
+    let attempts = 0;
+    let usedFallback = false;
 
-    async function handleSession(session: { user: { id: string } } | null) {
-      if (settled) return;
-      if (!session) return; // No redirigir inmediatamente si es null
+    const interval = setInterval(async () => {
+      if (!mounted) return;
+      attempts++;
+      console.log(`Negocio layout: attempt ${attempts}`);
 
-      settled = true;
-      clearTimeout(timeoutId);
+      let { data: { session } } = await supabase.auth.getSession();
 
-      const { data: roleData, error: roleError } = await supabase
-        .rpc("get_user_role", { user_uuid: session.user.id });
-
-      if (roleError) {
-        console.error("Negocio layout role error:", roleError);
-      }
-
-      const role = (roleData as string) ?? "usuario";
-      console.log("Negocio layout - session found, role:", role);
-
-      if (role === "admin") {
-        router.replace("/admin");
-        return;
-      }
-      if (role !== "negocio") {
-        router.replace("/");
-        return;
-      }
-
-      setChecking(false);
-    }
-
-    // 1. Try getSession immediately
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleSession(session);
-    });
-
-    // 2. Listen for session events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Negocio layout - auth event:", event, "has session:", !!session);
-        if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-          handleSession(session);
+      // Fallback: si no hay sesión, intentar con tokens de sessionStorage
+      if (!session && !usedFallback) {
+        const token = sessionStorage.getItem("puduweb_login_token");
+        const refresh = sessionStorage.getItem("puduweb_login_refresh");
+        if (token && refresh) {
+          console.log("Negocio layout: trying sessionStorage fallback");
+          usedFallback = true;
+          const { data: setData, error: setErr } = await supabase.auth.setSession({
+            access_token: token,
+            refresh_token: refresh,
+          });
+          if (setErr) {
+            console.error("Negocio layout: setSession error", setErr);
+          } else if (setData.session) {
+            session = setData.session;
+            sessionStorage.removeItem("puduweb_login_token");
+            sessionStorage.removeItem("puduweb_login_refresh");
+            sessionStorage.removeItem("puduweb_login_role");
+          }
         }
       }
-    );
 
-    // 3. Only redirect to /login after 3s if no session found
-    timeoutId = setTimeout(async () => {
-      if (settled) return;
-      // Último intento
-      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        handleSession(session);
-      } else {
-        console.log("Negocio layout - no session after 3s, redirecting to /login");
-        settled = true;
+        console.log("Negocio layout: session found for user", session.user.id);
+        clearInterval(interval);
+
+        const { data: roleData, error: roleError } = await supabase
+          .rpc("get_user_role", { user_uuid: session.user.id });
+        if (!mounted) return;
+
+        if (roleError) {
+          console.error("Negocio layout: role error", roleError);
+        }
+
+        const role = (roleData as string) ?? "usuario";
+        console.log("Negocio layout: role =", role);
+
+        if (role === "admin") {
+          router.replace("/admin");
+          return;
+        }
+        if (role !== "negocio") {
+          router.replace("/");
+          return;
+        }
+
+        setChecking(false);
+        return;
+      }
+
+      if (attempts >= 10) {
+        console.log("Negocio layout: no session after 10 attempts, redirecting to /login");
+        clearInterval(interval);
         router.replace("/login");
       }
-    }, 3000);
+    }, 500);
 
     return () => {
-      settled = true;
-      clearTimeout(timeoutId);
-      subscription.unsubscribe();
+      mounted = false;
+      clearInterval(interval);
     };
   }, [router]);
 
