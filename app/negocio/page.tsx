@@ -232,8 +232,18 @@ export default function NegocioDashboard() {
                 Aún no tienes un perfil creado.
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Si te registraste como negocio, tu perfil debería aparecer aquí.
+                Crea tu perfil para que los clientes puedan encontrarte.
               </p>
+              <button
+                onClick={() => {
+                  setEditingProfile(null);
+                  setShowForm(true);
+                }}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-dark"
+              >
+                <Store size={16} />
+                Crear perfil
+              </button>
             </div>
           ) : (
             <div className="space-y-4">

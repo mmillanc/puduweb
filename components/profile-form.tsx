@@ -131,7 +131,16 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
         .update({ ...cleanPayload, updated_at: new Date().toISOString() })
         .eq("id", profile.id);
     } else {
-      result = await supabase.from("profiles").insert(cleanPayload);
+      result = await supabase.from("profiles").insert(cleanPayload).select("id").single();
+
+      if (!result.error && result.data && !isAdmin) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          await supabase
+            .from("profile_owners")
+            .insert({ profile_id: result.data.id, user_id: userData.user.id });
+        }
+      }
     }
 
     if (result.error) {
