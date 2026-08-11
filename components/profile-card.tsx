@@ -16,7 +16,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
 
   return (
     <Link
-      href={`/perfil/${profile.slug}`}
+      href={`/${profile.slug}`}
       className="group block overflow-hidden rounded-xl border bg-card transition-all hover:shadow-lg hover:border-primary/50"
     >
       <div className="relative h-32 w-full bg-gradient-to-br from-primary/10 to-primary/5">

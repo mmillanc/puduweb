@@ -70,12 +70,12 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: `${baseUrl}/perfil/${profile.slug}` },
+    alternates: { canonical: `${baseUrl}/${profile.slug}` },
     openGraph: {
       title,
       description,
       type: "profile",
-      url: `${baseUrl}/perfil/${profile.slug}`,
+      url: `${baseUrl}/${profile.slug}`,
       images: image ? [{ url: image, width: 1200, height: 630, alt: profile.name }] : undefined,
       locale: "es_CL",
       siteName: "PuduWeb",
@@ -141,7 +141,7 @@ export default async function ProfileDetailPage({
     : [];
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const profileUrl = `${baseUrl}/perfil/${profile.slug}`;
+  const profileUrl = `${baseUrl}/${profile.slug}`;
 
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -454,7 +454,7 @@ export default async function ProfileDetailPage({
             name: profile.name,
             description: profile.description ?? profile.tagline ?? undefined,
             image: profile.cover_url ?? profile.avatar_url ?? undefined,
-            url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/perfil/${profile.slug}`,
+            url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/${profile.slug}`,
             telephone: profile.phone ?? undefined,
             email: profile.email ?? undefined,
             address: profile.address

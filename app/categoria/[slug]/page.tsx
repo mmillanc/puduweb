@@ -126,7 +126,7 @@ export default async function CategoryPage({
     hasPart: profiles.map((p) => ({
       "@type": "LocalBusiness",
       name: p.name,
-      url: `${baseUrl}/perfil/${p.slug}`,
+      url: `${baseUrl}/${p.slug}`,
       ...(p.city && { address: { "@type": "PostalAddress", addressLocality: p.city, addressCountry: "CL" } }),
     })),
   };

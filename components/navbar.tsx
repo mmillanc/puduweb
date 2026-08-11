@@ -75,10 +75,10 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="PuduWeb" className="h-12 w-auto" />
+          <img src="/logo.png" alt="PuduWeb" className="h-16 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">

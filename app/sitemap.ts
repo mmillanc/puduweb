@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq("is_published", true);
 
     profileRoutes = (profiles ?? []).map((p) => ({
-      url: `${baseUrl}/perfil/${p.slug}`,
+      url: `${baseUrl}/${p.slug}`,
       lastModified: new Date(p.updated_at),
       changeFrequency: "weekly" as const,
       priority: 0.6,

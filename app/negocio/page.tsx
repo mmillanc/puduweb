@@ -326,7 +326,7 @@ export default function NegocioDashboard() {
 
                     <div className="flex gap-1">
                       <a
-                        href={`/perfil/${p.slug}`}
+                        href={`/${p.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="rounded p-1.5 hover:bg-muted"

@@ -56,7 +56,7 @@ export function GlobalSearch() {
           id: p.id,
           name: p.name,
           subtitle: [p.tagline, p.city].filter(Boolean).join(" · ") || "Perfil",
-          href: `/perfil/${p.slug}`,
+          href: `/${p.slug}`,
         })
       );
 
