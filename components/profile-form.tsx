@@ -38,7 +38,7 @@ const emptyForm = {
   services: "",
   hours: "",
   gallery_urls: "",
-  is_published: true,
+  is_published: false,
   featured: false,
 };
 
@@ -116,7 +116,7 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
       services: form.services || null,
       hours: form.hours || null,
       gallery_urls: galleryArray.length > 0 ? galleryArray : null,
-      is_published: form.is_published,
+      is_published: !profile && !isAdmin ? false : form.is_published,
       featured: isAdmin ? form.featured : undefined,
     };
 
