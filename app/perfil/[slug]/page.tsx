@@ -34,21 +34,8 @@ const typeConfig = {
   vendedor: { label: "Vendedor", icon: Store },
 };
 
-export const revalidate = 3600;
-
-export async function generateStaticParams() {
-  try {
-    const { getSupabaseServerClient } = await import("@/lib/supabase-server");
-    const supabaseServer = getSupabaseServerClient();
-    const { data } = await supabaseServer
-      .from("profiles")
-      .select("slug")
-      .eq("is_published", true);
-    return (data ?? []).map((p) => ({ slug: p.slug }));
-  } catch {
-    return [];
-  }
-}
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateMetadata({
   params,
@@ -107,12 +94,16 @@ export default async function ProfileDetailPage({
   const { slug } = await params;
   const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
-  const { data } = await supabaseServer
+  const { data, error } = await supabaseServer
     .from("profiles")
     .select("*, category:categories(*)")
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
+
+  if (error) {
+    console.error("Profile page error:", error.message, "slug:", slug);
+  }
 
   if (!data) notFound();
 
