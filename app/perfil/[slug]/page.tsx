@@ -16,17 +16,20 @@ import {
   Mail,
   Globe,
   Clock,
-  Camera,
-  Users,
-  Briefcase,
-  Hash,
-  MessageCircle,
   ArrowLeft,
   User,
   Building2,
   Store,
   Star,
 } from "lucide-react";
+import {
+  FaInstagram,
+  FaFacebookF,
+  FaLinkedinIn,
+  FaXTwitter,
+  FaWhatsapp,
+  FaTiktok,
+} from "react-icons/fa6";
 
 const typeConfig = {
   profesional: { label: "Profesional", icon: User },
@@ -125,11 +128,12 @@ export default async function ProfileDetailPage({
   }
 
   const socials = [
-    { url: profile.instagram, icon: Camera, label: "Instagram" },
-    { url: profile.facebook, icon: Users, label: "Facebook" },
-    { url: profile.linkedin, icon: Briefcase, label: "LinkedIn" },
-    { url: profile.twitter, icon: Hash, label: "Twitter" },
-    { url: profile.whatsapp, icon: MessageCircle, label: "WhatsApp" },
+    { url: profile.instagram, icon: FaInstagram, label: "Instagram", color: "hover:bg-[#E4405F] hover:border-[#E4405F] hover:text-white" },
+    { url: profile.facebook, icon: FaFacebookF, label: "Facebook", color: "hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white" },
+    { url: profile.linkedin, icon: FaLinkedinIn, label: "LinkedIn", color: "hover:bg-[#0A66C2] hover:border-[#0A66C2] hover:text-white" },
+    { url: profile.twitter, icon: FaXTwitter, label: "Twitter", color: "hover:bg-black hover:border-black hover:text-white" },
+    { url: profile.whatsapp, icon: FaWhatsapp, label: "WhatsApp", color: "hover:bg-[#25D366] hover:border-[#25D366] hover:text-white" },
+    { url: profile.tiktok, icon: FaTiktok, label: "TikTok", color: "hover:bg-black hover:border-black hover:text-white" },
   ].filter((s) => s.url);
 
   const services = profile.services
@@ -384,7 +388,7 @@ export default async function ProfileDetailPage({
                   rel="noopener noreferrer"
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600"
                 >
-                  <MessageCircle size={16} />
+                  <FaWhatsapp size={16} />
                   WhatsApp
                 </a>
               )}
@@ -395,7 +399,7 @@ export default async function ProfileDetailPage({
               <div className="rounded-xl border bg-card p-5">
                 <h3 className="mb-4 font-semibold">Redes sociales</h3>
                 <div className="flex flex-wrap gap-3">
-                  {socials.map(({ url, icon: Icon, label }) => (
+                  {socials.map(({ url, icon: Icon, label, color }) => (
                     <a
                       key={label}
                       href={
@@ -403,7 +407,7 @@ export default async function ProfileDetailPage({
                       }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-10 w-10 items-center justify-center rounded-lg border hover:border-primary hover:text-primary transition-colors"
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-colors ${color}`}
                       aria-label={label}
                     >
                       <Icon size={18} />
