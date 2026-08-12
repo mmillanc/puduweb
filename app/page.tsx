@@ -124,7 +124,7 @@ function HomeContent() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
-                <span className="flex h-2 w-2 rounded-full bg-green-500" />
+                <span className="flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400" />
                 Directorio local de Chile
               </div>
               <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">

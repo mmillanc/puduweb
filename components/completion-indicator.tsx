@@ -32,10 +32,10 @@ export function CompletionIndicator({ profile }: CompletionIndicatorProps) {
   });
 
   const color =
-    percentage >= 80 ? "text-green-500" : percentage >= 50 ? "text-yellow-500" : "text-orange-500";
+    percentage >= 80 ? "text-green-600 dark:text-green-400" : percentage >= 50 ? "text-yellow-600 dark:text-yellow-400" : "text-orange-600 dark:text-orange-400";
 
   const barColor =
-    percentage >= 80 ? "bg-green-500" : percentage >= 50 ? "bg-yellow-500" : "bg-orange-500";
+    percentage >= 80 ? "bg-green-600 dark:bg-green-400" : percentage >= 50 ? "bg-yellow-500 dark:bg-yellow-400" : "bg-orange-500 dark:bg-orange-400";
 
   return (
     <div className="rounded-xl border bg-card p-4">
@@ -65,7 +65,7 @@ export function CompletionIndicator({ profile }: CompletionIndicatorProps) {
         </div>
       )}
       {missing.length === 0 && (
-        <p className="text-xs font-medium text-green-500">
+        <p className="text-xs font-medium text-green-600 dark:text-green-400">
           ¡Perfil completo! Mayor visibilidad en búsquedas.
         </p>
       )}

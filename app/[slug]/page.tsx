@@ -238,7 +238,7 @@ export default async function ProfileDetailPage({
             <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
               <h1 className="text-2xl font-bold sm:text-3xl">{profile.name}</h1>
               {profile.featured && (
-                <span className="flex items-center gap-1 rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-semibold text-yellow-900">
+                <span className="flex items-center gap-1 rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-semibold text-yellow-900 dark:bg-yellow-500 dark:text-yellow-950">
                   <Star size={12} fill="currentColor" />
                   Destacado
                 </span>
@@ -386,7 +386,7 @@ export default async function ProfileDetailPage({
                   href={`https://wa.me/${profile.whatsapp.replace(/[^0-9]/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600"
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
                 >
                   <FaWhatsapp size={16} />
                   WhatsApp

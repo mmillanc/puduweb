@@ -47,6 +47,7 @@ export default function NegocioDashboard() {
   const [showMessages, setShowMessages] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
   const [deleteReason, setDeleteReason] = useState("");
+  const [toggleTarget, setToggleTarget] = useState<Profile | null>(null);
   const [requestingDelete, setRequestingDelete] = useState(false);
 
   const fetchProfiles = useCallback(async () => {
@@ -120,6 +121,7 @@ export default function NegocioDashboard() {
     } else {
       showToast(profile.is_published ? "Perfil despublicado" : "Perfil publicado");
     }
+    setToggleTarget(null);
     fetchProfiles();
   }
 
@@ -232,8 +234,28 @@ export default function NegocioDashboard() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-primary" size={32} />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="overflow-hidden rounded-xl border bg-card">
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-muted" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                      <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+                    </div>
+                  </div>
+                  <div className="px-4 pb-3">
+                    <div className="h-2 w-full animate-pulse rounded-full bg-muted" />
+                  </div>
+                  <div className="flex items-center justify-between border-t px-4 py-3">
+                    <div className="h-6 w-24 animate-pulse rounded-full bg-muted" />
+                    <div className="flex gap-1">
+                      <div className="h-7 w-7 animate-pulse rounded bg-muted" />
+                      <div className="h-7 w-7 animate-pulse rounded bg-muted" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : profiles.length === 0 ? (
             <div className="rounded-xl border p-12 text-center">
@@ -313,7 +335,7 @@ export default function NegocioDashboard() {
 
                   <div className="flex items-center justify-between border-t px-4 py-3">
                     <button
-                      onClick={() => togglePublished(p)}
+                      onClick={() => setToggleTarget(p)}
                       className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition hover:opacity-80 ${
                         p.is_published
                           ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
@@ -453,6 +475,40 @@ export default function NegocioDashboard() {
               >
                 {requestingDelete ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                 Enviar solicitud
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación publicar/despublicar */}
+      {toggleTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-card p-6 shadow-xl">
+            <h2 className="text-lg font-semibold">
+              {toggleTarget.is_published ? "Despublicar perfil" : "Publicar perfil"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {toggleTarget.is_published
+                ? `Si despublicas "${toggleTarget.name}", ya no será visible para los usuarios en PuduWeb. Puedes volver a publicarlo cuando quieras.`
+                : `Al publicar "${toggleTarget.name}", será visible para todos los usuarios en PuduWeb.`}
+            </p>
+            <div className="mt-4 flex justify-end gap-3">
+              <button
+                onClick={() => setToggleTarget(null)}
+                className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => togglePublished(toggleTarget)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
+                  toggleTarget.is_published
+                    ? "bg-orange-500 hover:bg-orange-600"
+                    : "bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+                }`}
+              >
+                {toggleTarget.is_published ? "Despublicar" : "Publicar"}
               </button>
             </div>
           </div>

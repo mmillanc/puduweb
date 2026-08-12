@@ -30,7 +30,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
           />
         ) : null}
         {profile.featured && (
-          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-semibold text-yellow-900">
+          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-semibold text-yellow-900 dark:bg-yellow-500 dark:text-yellow-950">
             <Star size={12} fill="currentColor" />
             Destacado
           </span>
