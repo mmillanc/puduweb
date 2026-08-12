@@ -13,6 +13,13 @@ import {
   Clock,
   X,
 } from "lucide-react";
+import { ViewsChart } from "@/components/views-chart";
+
+interface DailyView {
+  date: string;
+  label: string;
+  count: number;
+}
 
 interface BusinessStatsProps {
   profileIds: string[];
@@ -33,6 +40,7 @@ export function BusinessStats({ profileIds }: BusinessStatsProps) {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [showMessages, setShowMessages] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [dailyViews, setDailyViews] = useState<DailyView[]>([]);
 
   useEffect(() => {
     async function fetchStats() {
@@ -41,7 +49,7 @@ export function BusinessStats({ profileIds }: BusinessStatsProps) {
         return;
       }
 
-      const [{ count: views }, { count: msgs }, { count: unread }, { data: msgData }] =
+      const [{ count: views }, { count: msgs }, { count: unread }, { data: msgData }, { data: viewsData }] =
         await Promise.all([
           supabase
             .from("profile_views")
@@ -62,7 +70,38 @@ export function BusinessStats({ profileIds }: BusinessStatsProps) {
             .in("profile_id", profileIds)
             .order("created_at", { ascending: false })
             .limit(20),
+          supabase
+            .from("profile_views")
+            .select("viewed_at")
+            .in("profile_id", profileIds)
+            .gte("viewed_at", new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString())
+            .order("viewed_at", { ascending: true }),
         ]);
+
+      // Agrupar vistas por día
+      const dayMap = new Map<string, number>();
+      const today = new Date();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        dayMap.set(key, 0);
+      }
+      (viewsData as { viewed_at: string }[] | null)?.forEach((v) => {
+        const key = v.viewed_at.slice(0, 10);
+        if (dayMap.has(key)) {
+          dayMap.set(key, (dayMap.get(key) ?? 0) + 1);
+        }
+      });
+      const daily: DailyView[] = Array.from(dayMap.entries()).map(([date, count]) => {
+        const d = new Date(date + "T00:00:00");
+        return {
+          date,
+          label: d.toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit" }),
+          count,
+        };
+      });
+      setDailyViews(daily);
 
       setStats({
         totalViews: views ?? 0,
@@ -140,6 +179,9 @@ export function BusinessStats({ profileIds }: BusinessStatsProps) {
           </div>
         </button>
       </div>
+
+      {/* Views chart */}
+      {dailyViews.length > 0 && <ViewsChart data={dailyViews} />}
 
       {/* Messages modal */}
       {showMessages && (
