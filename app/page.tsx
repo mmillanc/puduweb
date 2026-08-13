@@ -379,10 +379,9 @@ function HomeContent() {
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div className="rounded-2xl border bg-card p-8 text-center transition hover:shadow-md">
-            {/* TODO: Reemplazar con imagen real */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=200&fit=crop"
+              src="/profesionales.jpg"
               alt="Profesional"
               className="mb-4 rounded-xl"
             />
