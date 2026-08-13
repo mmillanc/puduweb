@@ -11,7 +11,6 @@ import { CompletionIndicator } from "@/components/completion-indicator";
 import {
   Pencil,
   LogOut,
-  Search,
   Loader2,
   ExternalLink,
   Eye,
@@ -30,7 +29,6 @@ export default function NegocioDashboard() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [ownedProfileIds, setOwnedProfileIds] = useState<string[]>([]);
@@ -72,24 +70,18 @@ export default function NegocioDashboard() {
       return;
     }
 
-    let query = supabase
+    const { data } = await supabase
       .from("profiles")
       .select("*, category:categories(*)")
       .in("id", profileIds)
       .order("created_at", { ascending: false });
-
-    if (search) {
-      query = query.or(`name.ilike.%${search}%,city.ilike.%${search}%`);
-    }
-
-    const { data } = await query;
     setProfiles((data as Profile[]) ?? []);
     setLoading(false);
 
     if (profileIds.length > 0) {
       fetchMessages();
     }
-  }, [search]);
+  }, []);
 
   useEffect(() => {
     supabase.from("categories").select("*").order("name").then(({ data }) => {
@@ -207,55 +199,42 @@ export default function NegocioDashboard() {
         <>
           <BusinessStats profileIds={ownedProfileIds} />
 
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                size={16}
-              />
-              <input
-                type="text"
-                placeholder="Buscar tu perfil..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary"
-              />
+          {profiles.length === 0 && !loading && (
+            <div className="mb-6">
+              <button
+                onClick={() => {
+                  setEditingProfile(null);
+                  setShowForm(true);
+                }}
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+              >
+                <Store size={16} />
+                Crear perfil
+              </button>
             </div>
-            <button
-              onClick={() => {
-                setEditingProfile(null);
-                setShowForm(true);
-              }}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
-            >
-              <Store size={16} />
-              Crear perfil
-            </button>
-          </div>
+          )}
 
           {loading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="overflow-hidden rounded-xl border bg-card">
-                  <div className="flex items-center gap-3 p-4">
-                    <div className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-muted" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-                      <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
-                    </div>
-                  </div>
-                  <div className="px-4 pb-3">
-                    <div className="h-2 w-full animate-pulse rounded-full bg-muted" />
-                  </div>
-                  <div className="flex items-center justify-between border-t px-4 py-3">
-                    <div className="h-6 w-24 animate-pulse rounded-full bg-muted" />
-                    <div className="flex gap-1">
-                      <div className="h-7 w-7 animate-pulse rounded bg-muted" />
-                      <div className="h-7 w-7 animate-pulse rounded bg-muted" />
-                    </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="overflow-hidden rounded-xl border bg-card">
+                <div className="flex items-center gap-3 p-4">
+                  <div className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-muted" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
                   </div>
                 </div>
-              ))}
+                <div className="px-4 pb-3">
+                  <div className="h-2 w-full animate-pulse rounded-full bg-muted" />
+                </div>
+                <div className="flex items-center justify-between border-t px-4 py-3">
+                  <div className="h-6 w-24 animate-pulse rounded-full bg-muted" />
+                  <div className="flex gap-1">
+                    <div className="h-7 w-7 animate-pulse rounded bg-muted" />
+                    <div className="h-7 w-7 animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+              </div>
             </div>
           ) : profiles.length === 0 ? (
             <div className="rounded-xl border p-12 text-center">
@@ -305,7 +284,7 @@ export default function NegocioDashboard() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4">
               {profiles.map((p) => (
                 <div
                   key={p.id}
