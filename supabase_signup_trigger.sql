@@ -88,7 +88,7 @@ begin
     values (
       coalesce(new.raw_user_meta_data->>'biz_name', 'Sin nombre'),
       v_slug,
-      coalesce(new.raw_user_meta_data->>'biz_type', 'pyme')::public.profiles.type%type,
+      coalesce(new.raw_user_meta_data->>'biz_type', 'pyme')::text,
       nullif(new.raw_user_meta_data->>'biz_category_id', '')::uuid,
       nullif(new.raw_user_meta_data->>'biz_tagline', ''),
       nullif(new.raw_user_meta_data->>'biz_description', ''),
