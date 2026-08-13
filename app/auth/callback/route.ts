@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get("code");
   const error = requestUrl.searchParams.get("error");
   const errorDescription = requestUrl.searchParams.get("error_description");
+  const type = requestUrl.searchParams.get("type");
 
   if (error) {
     return NextResponse.redirect(
@@ -29,6 +30,10 @@ export async function GET(request: Request) {
         return NextResponse.redirect(
           `${requestUrl.origin}/login?message=${encodeURIComponent("Error al confirmar email. Intenta de nuevo.")}`
         );
+      }
+
+      if (type === "recovery") {
+        return NextResponse.redirect(`${requestUrl.origin}/recuperar/reset`);
       }
     }
   }
