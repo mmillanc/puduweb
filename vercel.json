@@ -1,13 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "branches": {
-    "main": {
-      "url": "https://puduweb.cl"
-    },
-    "staging": {
-      "url": "https://staging-puduweb.vercel.app"
-    }
-  },
   "github": {
     "silent": true
   }
