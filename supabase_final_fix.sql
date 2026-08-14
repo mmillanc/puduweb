@@ -18,6 +18,32 @@
 -- ============================================================
 
 -- ============================================================
+-- 0. Tablas base (por si supabase_roles.sql no se ejecutó)
+-- ============================================================
+create table if not exists public.user_roles (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null check (role in ('admin', 'negocio', 'usuario')),
+  created_at timestamptz default now(),
+  unique(user_id)
+);
+
+create table if not exists public.profile_owners (
+  id uuid default gen_random_uuid() primary key,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique(profile_id, user_id)
+);
+
+create index if not exists idx_user_roles_user on public.user_roles(user_id);
+create index if not exists idx_profile_owners_profile on public.profile_owners(profile_id);
+create index if not exists idx_profile_owners_user on public.profile_owners(user_id);
+
+alter table public.user_roles enable row level security;
+alter table public.profile_owners enable row level security;
+
+-- ============================================================
 -- 1. Funciones helper (security definer, bypassan RLS)
 -- ============================================================
 create or replace function public.is_admin()

@@ -84,7 +84,9 @@ begin
       coalesce(new.raw_user_meta_data->>'biz_name', 'Sin nombre'),
       v_slug,
       coalesce(new.raw_user_meta_data->>'biz_type', 'pyme')::text,
-      nullif(new.raw_user_meta_data->>'biz_category_id', '')::uuid,
+      -- Si la categoría no existe, se inserta NULL (evita FK violation)
+      (select c.id from public.categories c
+        where c.id = nullif(new.raw_user_meta_data->>'biz_category_id', '')::uuid),
       nullif(new.raw_user_meta_data->>'biz_tagline', ''),
       nullif(new.raw_user_meta_data->>'biz_description', ''),
       nullif(new.raw_user_meta_data->>'biz_city', ''),
@@ -106,6 +108,10 @@ begin
   end if;
 
   return new;
+exception when others then
+  -- Registrar el error real en los logs de Supabase (Database > Logs)
+  raise log 'handle_new_user error para email %: %', new.email, sqlerrm;
+  raise;
 end;
 $$ language plpgsql security definer;
 
