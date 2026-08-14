@@ -28,7 +28,7 @@ select lower(
     ''
   )
 );
-$$ language sql immutable;
+$$ language sql immutable set search_path = public, extensions;
 
 -- Función que procesa el nuevo usuario
 create or replace function public.handle_new_user()
@@ -113,7 +113,7 @@ exception when others then
   raise log 'handle_new_user error para email %: %', new.email, sqlerrm;
   raise;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public, extensions;
 
 -- Trigger: después de insert (procesa inmediatamente al registrarse)
 drop trigger if exists on_auth_user_created on auth.users;
