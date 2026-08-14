@@ -77,6 +77,7 @@ drop policy if exists "Roles lectura propias o admin" on public.user_roles;
 drop policy if exists "Roles lectura propia" on public.user_roles;
 drop policy if exists "Roles insert propias" on public.user_roles;
 drop policy if exists "Roles insert propias no admin" on public.user_roles;
+drop policy if exists "Roles insert propia no admin" on public.user_roles;
 drop policy if exists "Roles update admin" on public.user_roles;
 drop policy if exists "Roles delete admin" on public.user_roles;
 
