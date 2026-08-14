@@ -1,6 +1,6 @@
 -- ============================================
 -- Trigger: Procesar registro de usuario
--- Se ejecuta cuando se confirma el email o al registrarse sin confirmación
+-- Se ejecuta cuando se registra un nuevo usuario
 -- ============================================
 
 -- Necesitamos la extensión unaccent para quitar acentos
@@ -40,11 +40,6 @@ declare
   v_existing_slug text;
   v_counter int := 0;
 begin
-  -- Solo procesar si el email está confirmado
-  if new.email_confirmed_at is null then
-    return new;
-  end if;
-
   -- Evitar duplicados: si ya tiene rol, no procesar
   if exists (select 1 from public.user_roles where user_id = new.id) then
     return new;
@@ -114,25 +109,12 @@ begin
 end;
 $$ language plpgsql security definer;
 
--- Trigger 1: después de insert (para registro sin confirmación de email)
+-- Trigger: después de insert (procesa inmediatamente al registrarse)
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users
 for each row
 execute function public.handle_new_user();
 
--- Trigger 2: después de update (cuando se confirma el email)
+-- Eliminar trigger de update de email_confirmed_at (ya no es necesario)
 drop trigger if exists on_auth_user_confirmed on auth.users;
-create trigger on_auth_user_confirmed
-after update of email_confirmed_at on auth.users
-for each row
-when (old.email_confirmed_at is null and new.email_confirmed_at is not null)
-execute function public.handle_new_user();
-
--- ============================================
--- FIX: Arreglar usuario ya registrado que no tiene rol
--- Ejecutar manualmente reemplazando el email
--- ============================================
--- insert into public.user_roles (user_id, role)
--- select id, 'negocio' from auth.users where email = 'EMAIL-AQUI'
--- on conflict (user_id) do update set role = 'negocio';

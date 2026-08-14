@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 function getEnvOrThrow() {
@@ -13,23 +14,22 @@ function getEnvOrThrow() {
 export async function getSupabaseServer(): Promise<SupabaseClient> {
   const { url, key } = getEnvOrThrow();
   const cookieStore = await cookies();
-  const authCookies = cookieStore
-    .getAll()
-    .filter((c) => c.name.startsWith("sb-"));
 
-  const accessToken = authCookies.find((c) =>
-    c.name.includes("auth-token")
-  )?.value;
-
-  return createClient(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    global: {
-      headers: accessToken
-        ? { Authorization: `Bearer ${accessToken}` }
-        : undefined,
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {
+          // El método setAll se llamó desde un Server Component.
+          // Se puede ignorar si el middleware refresca la sesión.
+        }
+      },
     },
   });
 }

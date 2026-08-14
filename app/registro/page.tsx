@@ -488,8 +488,8 @@ export default function RegisterPage() {
             <div className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-xs text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
               <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
               <span>
-                Tu perfil se creará como <strong>borrador</strong>. Un administrador lo
-                revisará y lo publicará. Mientras tanto, puedes seguir editándolo desde tu panel.
+                Tu perfil se creará como <strong>borrador</strong>. Puedes editarlo y
+                publicarlo cuando quieras desde tu panel de negocio.
               </span>
             </div>
           </div>

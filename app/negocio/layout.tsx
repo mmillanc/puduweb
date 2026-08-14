@@ -15,50 +15,15 @@ export default function NegocioLayout({
 
   useEffect(() => {
     let mounted = true;
-    let attempts = 0;
-    let usedFallback = false;
-    let resolved = false;
 
-    async function trySession(): Promise<void> {
-      if (!mounted || resolved) return;
-      attempts++;
-      console.log(`Negocio layout: attempt ${attempts}`);
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!mounted) return;
 
-      let { data: { session } } = await supabase.auth.getSession();
-
-      // Fallback: si no hay sesión, intentar con tokens de sessionStorage
-      if (!session && !usedFallback) {
-        const token = sessionStorage.getItem("puduweb_login_token");
-        const refresh = sessionStorage.getItem("puduweb_login_refresh");
-        if (token && refresh) {
-          console.log("Negocio layout: trying sessionStorage fallback");
-          usedFallback = true;
-          const { data: setData, error: setErr } = await supabase.auth.setSession({
-            access_token: token,
-            refresh_token: refresh,
-          });
-          if (setErr) {
-            console.error("Negocio layout: setSession error", setErr);
-          } else if (setData.session) {
-            session = setData.session;
-            sessionStorage.removeItem("puduweb_login_token");
-            sessionStorage.removeItem("puduweb_login_refresh");
-            sessionStorage.removeItem("puduweb_login_role");
-          }
-        }
+      if (!session) {
+        router.replace("/login");
+        return;
       }
-
-      if (session) {
-        await handleSessionFound(session);
-      }
-    }
-
-    async function handleSessionFound(session: { user: { id: string } }): Promise<void> {
-      if (!mounted || resolved) return;
-      resolved = true;
-      clearInterval(interval);
-
-      console.log("Negocio layout: session found for user", session.user.id);
 
       const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: session.user.id });
@@ -69,7 +34,6 @@ export default function NegocioLayout({
       }
 
       const role = (roleData as string) ?? "usuario";
-      console.log("Negocio layout: role =", role);
 
       if (role === "admin") {
         router.replace("/admin");
@@ -83,35 +47,10 @@ export default function NegocioLayout({
       setChecking(false);
     }
 
-    // Polling cada 500ms como backup
-    const interval = setInterval(() => {
-      if (!mounted || resolved) return;
-      if (attempts >= 10) {
-        console.log("Negocio layout: no session after 10 attempts, redirecting to /login");
-        clearInterval(interval);
-        router.replace("/login");
-        return;
-      }
-      trySession();
-    }, 500);
-
-    // onAuthStateChange: captura INITIAL_SESSION cuando Supabase carga desde localStorage
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Negocio layout: auth event:", event, !!session);
-        if (session && (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
-          handleSessionFound(session);
-        }
-      }
-    );
-
-    // Intento inmediato
-    trySession();
+    checkSession();
 
     return () => {
       mounted = false;
-      clearInterval(interval);
-      subscription.unsubscribe();
     };
   }, [router]);
 

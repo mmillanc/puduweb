@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import type { Session } from "@supabase/supabase-js";
 import { Loader2, LogIn, Mail, Lock, ArrowRight, Store, Search, Star, Eye, EyeOff } from "lucide-react";
 import { Suspense } from "react";
 
@@ -62,44 +61,6 @@ function LoginForm() {
       }
 
       console.log("Login exitoso - role:", role, "user:", data.user.id);
-
-      // Forzar la sesión en el cliente antes de navegar
-      if (data.session) {
-        const { error: setSessionError } = await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-        });
-        if (setSessionError) {
-          console.error("Error setSession:", setSessionError);
-        }
-
-        // Fallback: guardar tokens en sessionStorage por si Supabase no los persiste
-        try {
-          sessionStorage.setItem("puduweb_login_token", data.session.access_token);
-          sessionStorage.setItem("puduweb_login_refresh", data.session.refresh_token);
-          sessionStorage.setItem("puduweb_login_role", role ?? "");
-        } catch {
-          // ignore storage errors
-        }
-      }
-
-      let session: Session | null = data.session;
-      if (!session) {
-        let attempts = 0;
-        while (attempts < 20 && !session) {
-          const { data: { session: s } } = await supabase.auth.getSession();
-          session = s;
-          if (!session) {
-            await new Promise((r) => setTimeout(r, 100));
-          }
-          attempts++;
-        }
-      }
-
-      if (!session) {
-        setError("No se pudo iniciar sesión correctamente. Intenta de nuevo.");
-        return;
-      }
 
       if (!role) {
         window.location.href = "/";

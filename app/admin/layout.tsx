@@ -15,49 +15,15 @@ export default function AdminLayout({
 
   useEffect(() => {
     let mounted = true;
-    let attempts = 0;
-    let usedFallback = false;
-    let resolved = false;
 
-    async function trySession(): Promise<void> {
-      if (!mounted || resolved) return;
-      attempts++;
-      console.log(`Admin layout: attempt ${attempts}`);
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!mounted) return;
 
-      let { data: { session } } = await supabase.auth.getSession();
-
-      if (!session && !usedFallback) {
-        const token = sessionStorage.getItem("puduweb_login_token");
-        const refresh = sessionStorage.getItem("puduweb_login_refresh");
-        if (token && refresh) {
-          console.log("Admin layout: trying sessionStorage fallback");
-          usedFallback = true;
-          const { data: setData, error: setErr } = await supabase.auth.setSession({
-            access_token: token,
-            refresh_token: refresh,
-          });
-          if (setErr) {
-            console.error("Admin layout: setSession error", setErr);
-          } else if (setData.session) {
-            session = setData.session;
-            sessionStorage.removeItem("puduweb_login_token");
-            sessionStorage.removeItem("puduweb_login_refresh");
-            sessionStorage.removeItem("puduweb_login_role");
-          }
-        }
+      if (!session) {
+        router.replace("/login");
+        return;
       }
-
-      if (session) {
-        await handleSessionFound(session);
-      }
-    }
-
-    async function handleSessionFound(session: { user: { id: string } }): Promise<void> {
-      if (!mounted || resolved) return;
-      resolved = true;
-      clearInterval(interval);
-
-      console.log("Admin layout: session found for user", session.user.id);
 
       const { data: roleData, error: roleError } = await supabase
         .rpc("get_user_role", { user_uuid: session.user.id });
@@ -68,7 +34,6 @@ export default function AdminLayout({
       }
 
       const role = (roleData as string) ?? "usuario";
-      console.log("Admin layout: role =", role);
 
       if (role === "negocio") {
         router.replace("/negocio");
@@ -82,32 +47,10 @@ export default function AdminLayout({
       setChecking(false);
     }
 
-    const interval = setInterval(() => {
-      if (!mounted || resolved) return;
-      if (attempts >= 10) {
-        console.log("Admin layout: no session after 10 attempts, redirecting to /login");
-        clearInterval(interval);
-        router.replace("/login");
-        return;
-      }
-      trySession();
-    }, 500);
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Admin layout: auth event:", event, !!session);
-        if (session && (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
-          handleSessionFound(session);
-        }
-      }
-    );
-
-    trySession();
+    checkSession();
 
     return () => {
       mounted = false;
-      clearInterval(interval);
-      subscription.unsubscribe();
     };
   }, [router]);
 
