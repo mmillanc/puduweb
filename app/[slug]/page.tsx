@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { Profile } from "@/lib/types";
+import type { ComponentType } from "react";
 import { ReviewsSection } from "@/components/reviews-section";
 import { FavoriteButton } from "@/components/favorite-button";
 import { ViewTracker } from "@/components/view-tracker";
@@ -196,7 +197,7 @@ export default async function ProfileDetailPage({
     },
   ].filter(Boolean) as {
     url: string;
-    icon: (props: { size?: number }) => JSX.Element;
+    icon: ComponentType<{ size?: number }>;
     label: string;
     color: string;
   }[];
