@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
 import { Loader2, LogIn, Mail, Lock, ArrowRight, Store, Search, Star, Eye, EyeOff } from "lucide-react";
 import { Suspense } from "react";
+import { FaGoogle } from "react-icons/fa6";
 
 function LoginForm() {
   const router = useRouter();
@@ -245,6 +246,7 @@ function LoginForm() {
               <Loader2 size={16} className="animate-spin" />
             ) : (
               <>
+                <FaGoogle size={16} />
                 Continuar con Google
               </>
             )}

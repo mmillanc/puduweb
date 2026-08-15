@@ -114,6 +114,36 @@ export default async function ProfileDetailPage({
   const typeInfo = typeConfig[profile.type];
   const TypeIcon = typeInfo.icon;
 
+  const normalizeSocialUrl = (platform: string, raw: string): string => {
+    const trimmed = raw.trim();
+
+    if (!trimmed) return "";
+
+    // Si ya parece una URL completa, la usamos tal cual (añadiendo https:// si falta protocolo)
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      return trimmed;
+    }
+
+    const value = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+
+    switch (platform) {
+      case "instagram":
+        return `https://instagram.com/${value}`;
+      case "facebook":
+        return `https://facebook.com/${value}`;
+      case "linkedin":
+        return `https://www.linkedin.com/in/${value}`;
+      case "twitter":
+        // X/Twitter
+        return `https://x.com/${value}`;
+      case "tiktok":
+        return `https://www.tiktok.com/@${value}`;
+      default:
+        // Fallback genérico
+        return `https://${value}`;
+    }
+  };
+
   let related: Profile[] = [];
   if (profile.category_id) {
     const { data: relatedData } = await supabaseServer
@@ -128,13 +158,48 @@ export default async function ProfileDetailPage({
   }
 
   const socials = [
-    { url: profile.instagram, icon: FaInstagram, label: "Instagram", color: "hover:bg-[#E4405F] hover:border-[#E4405F] hover:text-white" },
-    { url: profile.facebook, icon: FaFacebookF, label: "Facebook", color: "hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white" },
-    { url: profile.linkedin, icon: FaLinkedinIn, label: "LinkedIn", color: "hover:bg-[#0A66C2] hover:border-[#0A66C2] hover:text-white" },
-    { url: profile.twitter, icon: FaXTwitter, label: "Twitter", color: "hover:bg-black hover:border-black hover:text-white" },
-    { url: profile.whatsapp, icon: FaWhatsapp, label: "WhatsApp", color: "hover:bg-[#25D366] hover:border-[#25D366] hover:text-white" },
-    { url: profile.tiktok, icon: FaTiktok, label: "TikTok", color: "hover:bg-black hover:border-black hover:text-white" },
-  ].filter((s) => s.url);
+    profile.instagram && {
+      url: normalizeSocialUrl("instagram", profile.instagram),
+      icon: FaInstagram,
+      label: "Instagram",
+      color: "hover:bg-[#E4405F] hover:border-[#E4405F] hover:text-white",
+    },
+    profile.facebook && {
+      url: normalizeSocialUrl("facebook", profile.facebook),
+      icon: FaFacebookF,
+      label: "Facebook",
+      color: "hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white",
+    },
+    profile.linkedin && {
+      url: normalizeSocialUrl("linkedin", profile.linkedin),
+      icon: FaLinkedinIn,
+      label: "LinkedIn",
+      color: "hover:bg-[#0A66C2] hover:border-[#0A66C2] hover:text-white",
+    },
+    profile.twitter && {
+      url: normalizeSocialUrl("twitter", profile.twitter),
+      icon: FaXTwitter,
+      label: "Twitter",
+      color: "hover:bg-black hover:border-black hover:text-white",
+    },
+    profile.whatsapp && {
+      url: normalizeSocialUrl("whatsapp", profile.whatsapp),
+      icon: FaWhatsapp,
+      label: "WhatsApp",
+      color: "hover:bg-[#25D366] hover:border-[#25D366] hover:text-white",
+    },
+    profile.tiktok && {
+      url: normalizeSocialUrl("tiktok", profile.tiktok),
+      icon: FaTiktok,
+      label: "TikTok",
+      color: "hover:bg-black hover:border-black hover:text-white",
+    },
+  ].filter(Boolean) as {
+    url: string;
+    icon: (props: { size?: number }) => JSX.Element;
+    label: string;
+    color: string;
+  }[];
 
   const services = profile.services
     ? profile.services.split(",").map((s) => s.trim()).filter(Boolean)
@@ -152,7 +217,7 @@ export default async function ProfileDetailPage({
     ...(profile.avatar_url && { image: profile.avatar_url }),
     ...(profile.phone && { telephone: profile.phone }),
     ...(profile.email && { email: profile.email }),
-    ...(profile.website && { sameAs: [profile.website] }),
+    ...(profile.website && { sameAs: [profile.website.startsWith("http") ? profile.website : `https://${profile.website}`] }),
     ...(profile.address && {
       address: {
         "@type": "PostalAddress",
@@ -169,7 +234,7 @@ export default async function ProfileDetailPage({
     ...(profile.hours && { openingHours: profile.hours }),
   };
 
-  const socialLinks = [profile.instagram, profile.facebook, profile.linkedin, profile.twitter, profile.whatsapp].filter(Boolean);
+  const socialLinks = socials.map((s) => s.url);
   if (socialLinks.length > 0) {
     jsonLd.sameAs = [...(jsonLd.sameAs as string[] ?? []), ...socialLinks];
   }
@@ -402,9 +467,7 @@ export default async function ProfileDetailPage({
                   {socials.map(({ url, icon: Icon, label, color }) => (
                     <a
                       key={label}
-                      href={
-                        url!.startsWith("http") ? url! : `https://${url!}`
-                      }
+                      href={url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-colors ${color}`}

@@ -48,6 +48,10 @@ const faqs = [
     q: "¿Qué hace PuduWeb con mis datos?",
     a: "Tus datos se usan únicamente para mostrar tu perfil en el directorio y permitir el contacto con potenciales clientes. No vendemos ni compartimos tu información. Ver nuestra /privacidad.",
   },
+  {
+    q: "¿Por qué al iniciar sesión con Google veo una dirección .supabase.co?",
+    a: "PuduWeb utiliza Supabase como proveedor seguro de autenticación. Por eso, cuando inicias sesión con Google, Google muestra que estás dando acceso a la URL de nuestro proyecto en Supabase (un dominio .supabase.co). Es normal y seguro: Supabase solo gestiona el inicio de sesión y luego te redirige de vuelta a puduweb.cl. Tus credenciales de Google nunca pasan por nuestros servidores.",
+  },
 ];
 
 export default function FAQPage() {

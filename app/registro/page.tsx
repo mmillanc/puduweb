@@ -14,6 +14,7 @@ import {
 } from "@/lib/validations";
 import type { Category } from "@/lib/types";
 import { Loader2, User, Store, ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { FaGoogle } from "react-icons/fa6";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -557,6 +558,7 @@ export default function RegisterPage() {
           <Loader2 size={16} className="animate-spin" />
         ) : (
           <>
+            <FaGoogle size={16} />
             Registrarse con Google (usuario)
           </>
         )}
