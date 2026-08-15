@@ -14,6 +14,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const message = searchParams.get("message");
 
@@ -79,6 +80,35 @@ function LoginForm() {
       setError(err instanceof Error ? err.message : "Ocurrió un error inesperado.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    try {
+      setError(null);
+      setGoogleLoading(true);
+
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (oauthError) {
+        console.error("Google OAuth error:", oauthError);
+        setError(oauthError.message);
+        setGoogleLoading(false);
+      }
+      // En flujos normales, Supabase redirige a Google inmediatamente.
+    } catch (err) {
+      console.error("Google login exception:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error al iniciar sesión con Google."
+      );
+      setGoogleLoading(false);
     }
   }
 
@@ -198,6 +228,27 @@ function LoginForm() {
               )}
             </button>
           </form>
+
+          <div className="mt-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">o</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border bg-background px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+          >
+            {googleLoading ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <>
+                Continuar con Google
+              </>
+            )}
+          </button>
 
           <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
             <a href="/recuperar" className="block font-medium text-primary hover:underline">

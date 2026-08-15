@@ -20,6 +20,7 @@ export default function RegisterPage() {
   const [role, setRole] = useState<"negocio" | "usuario">("usuario");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [email, setEmail] = useState("");
@@ -150,6 +151,35 @@ export default function RegisterPage() {
       router.refresh();
     } else {
       router.push("/login?message=Revisa tu email para confirmar tu cuenta");
+    }
+  }
+
+  async function handleGoogleLogin() {
+    try {
+      setError(null);
+      setGoogleLoading(true);
+
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (oauthError) {
+        console.error("Google OAuth error (registro):", oauthError);
+        setError(oauthError.message);
+        setGoogleLoading(false);
+      }
+      // En el flujo normal, Supabase redirige a Google inmediatamente.
+    } catch (err) {
+      console.error("Google login exception (registro):", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error al registrarse con Google."
+      );
+      setGoogleLoading(false);
     }
   }
 
@@ -510,6 +540,27 @@ export default function RegisterPage() {
           )}
         </button>
       </form>
+
+      <div className="mt-4 flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs text-muted-foreground">o</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        disabled={googleLoading}
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border bg-background px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+      >
+        {googleLoading ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : (
+          <>
+            Registrarse con Google (usuario)
+          </>
+        )}
+      </button>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         ¿Ya tienes cuenta?{" "}
