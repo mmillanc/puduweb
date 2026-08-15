@@ -86,7 +86,67 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
     setSaving(true);
     setError(null);
 
-    const slug = form.slug || slugify(form.name);
+    const slug = (form.slug || slugify(form.name)).trim();
+
+    if (!slug) {
+      setError("La URL del perfil no puede estar vacía. Revisa el nombre o el slug.");
+      setSaving(false);
+      return;
+    }
+
+    // Validación de slug único para evitar errores de constraint en la base de datos
+    try {
+      if (profile) {
+        // Si estamos editando y el slug cambió, verificamos que no exista en otro perfil
+        if (slug !== profile.slug) {
+          const { data: existing, error: slugError } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("slug", slug)
+            .neq("id", profile.id)
+            .limit(1);
+
+          if (slugError) {
+            console.error("Error al validar slug único (update):", slugError.message);
+            setError("No se pudo validar la URL del perfil. Intenta nuevamente.");
+            setSaving(false);
+            return;
+          }
+
+          if (existing && existing.length > 0) {
+            setError("Ya existe un perfil con esta URL. Elige otro nombre o ajusta el slug.");
+            setSaving(false);
+            return;
+          }
+        }
+      } else {
+        // Nuevo perfil: comprobamos si ya existe cualquier perfil con ese slug
+        const { data: existing, error: slugError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("slug", slug)
+          .limit(1);
+
+        if (slugError) {
+          console.error("Error al validar slug único (insert):", slugError.message);
+          setError("No se pudo validar la URL del perfil. Intenta nuevamente.");
+          setSaving(false);
+          return;
+        }
+
+        if (existing && existing.length > 0) {
+          setError("Ya existe un perfil con esta URL. Elige otro nombre o ajusta el slug.");
+          setSaving(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error("Excepción al validar slug único:", err);
+      setError("Ocurrió un error al validar la URL del perfil. Intenta nuevamente.");
+      setSaving(false);
+      return;
+    }
+
     const galleryArray = form.gallery_urls
       .split("\n")
       .map((s) => s.trim())
