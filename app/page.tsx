@@ -24,10 +24,14 @@ function HomeContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [cities, setCities] = useState<string[]>([]);
+  const [regions, setRegions] = useState<string[]>([]);
 
   const search = searchParams.get("q") ?? "";
   const selectedCategory = searchParams.get("category") ?? "all";
   const selectedType = searchParams.get("type") ?? "all";
+  const selectedCity = searchParams.get("city") ?? "all";
+  const selectedRegion = searchParams.get("region") ?? "all";
   const page = parseInt(searchParams.get("page") ?? "1", 10);
 
   const selectedSort = searchParams.get("sort") ?? "featured";
@@ -52,6 +56,36 @@ function HomeContent() {
     supabase.from("categories").select("*").order("name").then(({ data }) => {
       if (data) setCategories(data as Category[]);
     });
+  }, []);
+
+  // Cargar lista de ciudades y regiones disponibles para los filtros de ubicación
+  useEffect(() => {
+    supabase
+      .from("profiles")
+      .select("city, region")
+      .eq("is_published", true)
+      .then(({ data, error }) => {
+        if (error || !data) return;
+
+        const uniqueCities = Array.from(
+          new Set(
+            data
+              .map((p: any) => p.city as string | null)
+              .filter((c): c is string => !!c && c.trim().length > 0)
+          )
+        ).sort((a, b) => a.localeCompare(b));
+
+        const uniqueRegions = Array.from(
+          new Set(
+            data
+              .map((p: any) => p.region as string | null)
+              .filter((r): r is string => !!r && r.trim().length > 0)
+          )
+        ).sort((a, b) => a.localeCompare(b));
+
+        setCities(uniqueCities);
+        setRegions(uniqueRegions);
+      });
   }, []);
 
   function updateParam(key: string, value: string | null) {
@@ -97,6 +131,12 @@ function HomeContent() {
     if (selectedType !== "all") {
       query = query.eq("type", selectedType);
     }
+    if (selectedCity !== "all") {
+      query = query.eq("city", selectedCity);
+    }
+    if (selectedRegion !== "all") {
+      query = query.eq("region", selectedRegion);
+    }
 
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
@@ -106,14 +146,19 @@ function HomeContent() {
     setProfiles((data as Profile[]) ?? []);
     setTotalCount(count ?? 0);
     setLoading(false);
-  }, [search, selectedCategory, selectedType, selectedSort, page]);
+  }, [search, selectedCategory, selectedType, selectedCity, selectedRegion, selectedSort, page]);
 
   useEffect(() => {
     fetchProfiles();
   }, [fetchProfiles]);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-  const hasFilters = search || selectedCategory !== "all" || selectedType !== "all";
+  const hasFilters =
+    search ||
+    selectedCategory !== "all" ||
+    selectedType !== "all" ||
+    selectedCity !== "all" ||
+    selectedRegion !== "all";
 
   return (
     <div className="min-h-screen">
@@ -480,6 +525,36 @@ function HomeContent() {
               </option>
             ))}
           </select>
+
+          {cities.length > 0 && (
+            <select
+              value={selectedCity}
+              onChange={(e) => updateParam("city", e.target.value)}
+              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">Todas las ciudades</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {regions.length > 0 && (
+            <select
+              value={selectedRegion}
+              onChange={(e) => updateParam("region", e.target.value)}
+              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">Todas las regiones</option>
+              {regions.map((region) => (
+                <option key={region} value={region}>
+                  {region}
+                </option>
+              ))}
+            </select>
+          )}
 
           <select
             value={selectedType}
