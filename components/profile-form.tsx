@@ -37,7 +37,10 @@ const emptyForm = {
   cover_url: "",
   services: "",
   hours: "",
-  gallery_urls: "",
+  gallery1: "",
+  gallery2: "",
+  gallery3: "",
+  gallery4: "",
   is_published: false,
   featured: false,
 };
@@ -68,7 +71,10 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
           cover_url: profile.cover_url ?? "",
           services: profile.services ?? "",
           hours: profile.hours ?? "",
-          gallery_urls: profile.gallery_urls?.join("\n") ?? "",
+          gallery1: profile.gallery_urls?.[0] ?? "",
+          gallery2: profile.gallery_urls?.[1] ?? "",
+          gallery3: profile.gallery_urls?.[2] ?? "",
+          gallery4: profile.gallery_urls?.[3] ?? "",
           is_published: profile.is_published,
           featured: profile.featured,
         }
@@ -147,8 +153,7 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
       return;
     }
 
-    const galleryArray = form.gallery_urls
-      .split("\n")
+    const galleryArray = [form.gallery1, form.gallery2, form.gallery3, form.gallery4]
       .map((s) => s.trim())
       .filter(Boolean);
 
@@ -484,14 +489,38 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
             </div>
             <div className="sm:col-span-2">
               <label className={labelClass}>
-                Galería (una URL por línea)
+                Galería (hasta 4 imágenes)
               </label>
-              <textarea
-                value={form.gallery_urls}
-                onChange={(e) => update("gallery_urls", e.target.value)}
-                className={`${inputClass} min-h-[80px]`}
-                placeholder={"https://...imagen1.jpg\nhttps://...imagen2.jpg"}
-              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <ImageUpload
+                  label="Imagen 1"
+                  value={form.gallery1}
+                  onChange={(url) => update("gallery1", url)}
+                  folder="gallery"
+                  aspectRatio="square"
+                />
+                <ImageUpload
+                  label="Imagen 2"
+                  value={form.gallery2}
+                  onChange={(url) => update("gallery2", url)}
+                  folder="gallery"
+                  aspectRatio="square"
+                />
+                <ImageUpload
+                  label="Imagen 3"
+                  value={form.gallery3}
+                  onChange={(url) => update("gallery3", url)}
+                  folder="gallery"
+                  aspectRatio="square"
+                />
+                <ImageUpload
+                  label="Imagen 4"
+                  value={form.gallery4}
+                  onChange={(url) => update("gallery4", url)}
+                  folder="gallery"
+                  aspectRatio="square"
+                />
+              </div>
             </div>
           </div>
         </fieldset>

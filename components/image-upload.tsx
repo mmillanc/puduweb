@@ -30,6 +30,63 @@ export function ImageUpload({
     });
   }, []);
 
+  async function resizeImage(
+    file: File,
+    maxWidth: number,
+    maxHeight: number,
+    quality = 0.8
+  ): Promise<Blob> {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("No se pudo leer la imagen"));
+        }
+      };
+      reader.onerror = () => reject(reader.error || new Error("Error al leer la imagen"));
+      reader.readAsDataURL(file);
+    });
+
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("No se pudo cargar la imagen"));
+      image.src = dataUrl;
+    });
+
+    const { width, height } = img;
+
+    if (width <= maxWidth && height <= maxHeight) {
+      return file;
+    }
+
+    const ratio = Math.min(maxWidth / width, maxHeight / height);
+    const targetWidth = Math.round(width * ratio);
+    const targetHeight = Math.round(height * ratio);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("No se pudo crear el contexto del canvas");
+    }
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("No se pudo generar la imagen optimizada"));
+        },
+        file.type || "image/jpeg",
+        quality
+      );
+    });
+  }
+
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -54,12 +111,20 @@ export function ImageUpload({
     setUploading(true);
     setError(null);
 
+    let fileToUpload: Blob | File = file;
+
+    try {
+      fileToUpload = await resizeImage(file, 1600, 1600, 0.8);
+    } catch (err) {
+      console.error("Error al optimizar la imagen", err);
+    }
+
     const ext = file.name.split(".").pop();
     const fileName = `${userId}/${folder}/${Date.now()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from("profile-images")
-      .upload(fileName, file, { cacheControl: "3600", upsert: false });
+      .upload(fileName, fileToUpload, { cacheControl: "3600", upsert: false });
 
     if (uploadError) {
       setError(uploadError.message);

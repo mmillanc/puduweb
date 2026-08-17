@@ -11,6 +11,7 @@ import { ContactForm } from "@/components/contact-form";
 import { ShareButton } from "@/components/share-button";
 import { ProfileCard } from "@/components/profile-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { GalleryLightbox } from "@/components/gallery-lightbox";
 import {
   MapPin,
   Phone,
@@ -368,22 +369,10 @@ export default async function ProfileDetailPage({
             {profile.gallery_urls && profile.gallery_urls.length > 0 && (
               <section>
                 <h2 className="mb-3 text-xl font-semibold">Galería</h2>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {profile.gallery_urls.map((url, i) => (
-                    <div
-                      key={i}
-                      className="relative aspect-square overflow-hidden rounded-lg bg-muted"
-                    >
-                      <Image
-                        src={url}
-                        alt={`${profile.name} - imagen ${i + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="300px"
-                      />
-                    </div>
-                  ))}
-                </div>
+                <GalleryLightbox
+                  images={profile.gallery_urls}
+                  profileName={profile.name}
+                />
               </section>
             )}
           </div>
