@@ -71,13 +71,23 @@ export async function generateMetadata({
   const cat = data as Category;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+  const seoTitle =
+    cat.seo_title && cat.seo_title.trim().length > 0
+      ? cat.seo_title
+      : `${cat.name} - Profesionales y pymes en Chile`;
+
+  const seoDescription =
+    cat.seo_description && cat.seo_description.trim().length > 0
+      ? cat.seo_description
+      : `Directorio de profesionales, pymes y vendedores en la categoría ${cat.name}. Encuentra servicios cerca de ti en Chile.`;
+
   return {
-    title: `${cat.name} - Profesionales y pymes`,
-    description: `Directorio de profesionales, pymes y vendedores en la categoría ${cat.name}. Encuentra servicios cerca de ti.`,
+    title: seoTitle,
+    description: seoDescription,
     alternates: { canonical: `${baseUrl}/categoria/${cat.slug}` },
     openGraph: {
-      title: `${cat.name} - Profesionales y pymes | PuduWeb`,
-      description: `Directorio de profesionales, pymes y vendedores en ${cat.name}.`,
+      title: `${seoTitle} | PuduWeb`,
+      description: seoDescription,
       type: "website",
       locale: "es_CL",
       siteName: "PuduWeb",
@@ -117,11 +127,21 @@ export default async function CategoryPage({
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+  const seoTitle =
+    category.seo_title && category.seo_title.trim().length > 0
+      ? category.seo_title
+      : `${category.name} - Profesionales y pymes en Chile`;
+
+  const seoDescription =
+    category.seo_description && category.seo_description.trim().length > 0
+      ? category.seo_description
+      : `Directorio de profesionales, pymes y vendedores en la categoría ${category.name}. Encuentra servicios cerca de ti en Chile.`;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `${category.name} - Directorio PuduWeb`,
-    description: `Directorio de profesionales, pymes y vendedores en la categoría ${category.name}. Encuentra servicios cerca de ti.`,
+    name: `${seoTitle} | PuduWeb`,
+    description: seoDescription,
     url: `${baseUrl}/categoria/${category.slug}`,
     hasPart: profiles.map((p) => ({
       "@type": "LocalBusiness",
@@ -157,6 +177,11 @@ export default async function CategoryPage({
               <p className="mt-1 text-muted-foreground">
                 {profiles.length} {profiles.length === 1 ? "perfil" : "perfiles"} en esta categoría
               </p>
+              {category.intro_text && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {category.intro_text}
+                </p>
+              )}
             </div>
           </div>
         </div>

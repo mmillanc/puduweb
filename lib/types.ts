@@ -6,6 +6,9 @@ export interface Category {
   name: string;
   slug: string;
   icon: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  intro_text: string | null;
 }
 
 export interface Profile {

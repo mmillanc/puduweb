@@ -40,6 +40,11 @@ create index if not exists idx_user_roles_user on public.user_roles(user_id);
 create index if not exists idx_profile_owners_profile on public.profile_owners(profile_id);
 create index if not exists idx_profile_owners_user on public.profile_owners(user_id);
 
+alter table if exists public.categories
+  add column if not exists seo_title text,
+  add column if not exists seo_description text,
+  add column if not exists intro_text text;
+
 alter table public.user_roles enable row level security;
 alter table public.profile_owners enable row level security;
 

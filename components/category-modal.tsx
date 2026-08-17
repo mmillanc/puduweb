@@ -43,6 +43,9 @@ export function CategoryModal({ onClose, onSaved }: CategoryModalProps) {
 
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("tag");
+  const [seoTitle, setSeoTitle] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
+  const [introText, setIntroText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const fetchCategories = useCallback(async () => {
@@ -63,6 +66,9 @@ export function CategoryModal({ onClose, onSaved }: CategoryModalProps) {
     setEditing(null);
     setName("");
     setIcon("tag");
+    setSeoTitle("");
+    setSeoDescription("");
+    setIntroText("");
     setShowForm(true);
     setError(null);
   }
@@ -71,6 +77,9 @@ export function CategoryModal({ onClose, onSaved }: CategoryModalProps) {
     setEditing(cat);
     setName(cat.name);
     setIcon(cat.icon ?? "tag");
+    setSeoTitle(cat.seo_title ?? "");
+    setSeoDescription(cat.seo_description ?? "");
+    setIntroText(cat.intro_text ?? "");
     setShowForm(true);
     setError(null);
   }
@@ -87,10 +96,14 @@ export function CategoryModal({ onClose, onSaved }: CategoryModalProps) {
       return;
     }
 
+    const seo_title = seoTitle.trim() || null;
+    const seo_description = seoDescription.trim() || null;
+    const intro_text = introText.trim() || null;
+
     if (editing) {
       const { error: updateError } = await supabase
         .from("categories")
-        .update({ name, slug, icon })
+        .update({ name, slug, icon, seo_title, seo_description, intro_text })
         .eq("id", editing.id);
       if (updateError) {
         setError(updateError.message);
@@ -100,7 +113,7 @@ export function CategoryModal({ onClose, onSaved }: CategoryModalProps) {
     } else {
       const { error: insertError } = await supabase
         .from("categories")
-        .insert({ name, slug, icon });
+        .insert({ name, slug, icon, seo_title, seo_description, intro_text });
       if (insertError) {
         setError(insertError.message);
         setSaving(false);
@@ -179,6 +192,33 @@ export function CategoryModal({ onClose, onSaved }: CategoryModalProps) {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Título SEO (opcional)</label>
+                <input
+                  value={seoTitle}
+                  onChange={(e) => setSeoTitle(e.target.value)}
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Ej: Kinesiólogos en Santiago - Salud y Rehabilitación"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Meta descripción (opcional)</label>
+                <textarea
+                  value={seoDescription}
+                  onChange={(e) => setSeoDescription(e.target.value)}
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary min-h-[60px]"
+                  placeholder="Texto que verá Google bajo el título de esta categoría."
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Texto introductorio en la página (opcional)</label>
+                <textarea
+                  value={introText}
+                  onChange={(e) => setIntroText(e.target.value)}
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary min-h-[60px]"
+                  placeholder="Introducción que se mostrará en la parte superior de la categoría."
+                />
               </div>
               <div className="flex gap-2">
                 <button
