@@ -97,10 +97,17 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const { slug } = await params;
+  const selectedCity =
+    typeof searchParams?.city === "string" ? searchParams.city : "";
+  const selectedRegion =
+    typeof searchParams?.region === "string" ? searchParams.region : "";
+
   const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
   const { data: catData } = await supabaseServer
@@ -114,7 +121,7 @@ export default async function CategoryPage({
   const category = catData as Category;
   const Icon = iconMap[category.icon ?? "tag"] ?? Tag;
 
-  const { data: profilesData } = await supabaseServer
+  let profilesQuery = supabaseServer
     .from("profiles")
     .select("*, category:categories(*)")
     .eq("is_published", true)
@@ -123,7 +130,39 @@ export default async function CategoryPage({
     .order("created_at", { ascending: false })
     .limit(24);
 
+  if (selectedCity) {
+    profilesQuery = profilesQuery.eq("city", selectedCity);
+  }
+
+  if (selectedRegion) {
+    profilesQuery = profilesQuery.eq("region", selectedRegion);
+  }
+
+  const { data: profilesData } = await profilesQuery;
+
   const profiles = (profilesData as Profile[]) ?? [];
+
+  const { data: locationsData } = await supabaseServer
+    .from("profiles")
+    .select("city, region")
+    .eq("is_published", true)
+    .eq("category_id", category.id);
+
+  const cities = Array.from(
+    new Set(
+      (locationsData ?? [])
+        .map((p: any) => (p.city as string | null) ?? "")
+        .filter((c) => c && c.trim().length > 0),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+
+  const regions = Array.from(
+    new Set(
+      (locationsData ?? [])
+        .map((p: any) => (p.region as string | null) ?? "")
+        .filter((r) => r && r.trim().length > 0),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -187,8 +226,65 @@ export default async function CategoryPage({
         </div>
       </section>
 
-      {/* Grid */}
+      {/* Filtros + Grid */}
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        {(cities.length > 0 || regions.length > 0) && (
+          <div className="mb-6 rounded-xl border bg-card p-4">
+            <form className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  Ciudad
+                </label>
+                <select
+                  name="city"
+                  defaultValue={selectedCity}
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Todas las ciudades</option>
+                  {cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  Región
+                </label>
+                <select
+                  name="region"
+                  defaultValue={selectedRegion}
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Todas las regiones</option>
+                  {regions.map((region) => (
+                    <option key={region} value={region}>
+                      {region}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-end gap-2">
+                <button
+                  type="submit"
+                  className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                >
+                  Aplicar filtros
+                </button>
+                {(selectedCity || selectedRegion) && (
+                  <Link
+                    href={`/categoria/${category.slug}`}
+                    className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
+                  >
+                    Limpiar
+                  </Link>
+                )}
+              </div>
+            </form>
+          </div>
+        )}
+
         {profiles.length === 0 ? (
           <div className="rounded-xl border p-12 text-center">
             <p className="text-muted-foreground">

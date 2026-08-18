@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { Category } from "@/lib/types";
 import Link from "next/link";
 import {
@@ -15,6 +16,13 @@ import {
   Tag,
   type LucideIcon,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Categorías | PuduWeb",
+  description:
+    "Explora profesionales, pymes y vendedores por categoría en el directorio PuduWeb.",
+  alternates: { canonical: "/categorias" },
+};
 
 const iconMap: Record<string, LucideIcon> = {
   heart: Heart,
