@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase-client";
 import type { Profile, Category, ProfileType } from "@/lib/types";
 import { slugify } from "@/lib/utils";
@@ -235,27 +236,28 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
   const labelClass = "mb-1 block text-sm font-medium";
 
   return (
-    <div className="rounded-xl border bg-card p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-bold">
-          {profile ? "Editar perfil" : "Nuevo perfil"}
-        </h2>
-        <button
-          onClick={onClose}
-          className="rounded-lg p-2 hover:bg-muted"
-          aria-label="Cerrar"
-        >
-          <X size={20} />
-        </button>
-      </div>
-
-      {error && (
-        <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-400">
-          {error}
+    <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
+      <div className="rounded-xl border bg-card p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-xl font-bold">
+            {profile ? "Editar perfil" : "Nuevo perfil"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-2 hover:bg-muted"
+            aria-label="Cerrar"
+          >
+            <X size={20} />
+          </button>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-400">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Datos básicos */}
         <fieldset className="space-y-4">
           <legend className="mb-2 text-sm font-semibold text-muted-foreground">
@@ -590,15 +592,15 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
               Publicado
             </label>
             {isAdmin && (
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.featured}
-                onChange={(e) => update("featured", e.target.checked)}
-                className="h-4 w-4 rounded"
-              />
-              Destacado
-            </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.featured}
+                  onChange={(e) => update("featured", e.target.checked)}
+                  className="h-4 w-4 rounded"
+                />
+                Destacado
+              </label>
             )}
           </div>
         </fieldset>
@@ -626,6 +628,140 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
           </button>
         </div>
       </form>
+      </div>
+
+      <div className="mt-6 lg:mt-0">
+        <div className="rounded-xl border bg-card p-5 lg:sticky lg:top-4">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Vista previa
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            As&iacute; se ver&aacute; aproximadamente tu perfil p&uacute;blico.
+          </p>
+
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 overflow-hidden rounded-full bg-muted">
+                {form.avatar_url ? (
+                  <Image
+                    src={form.avatar_url}
+                    alt={form.name || "Avatar del perfil"}
+                    width={56}
+                    height={56}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                    Avatar
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">
+                  {form.name || "Nombre del perfil"}
+                </p>
+                {form.tagline ? (
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {form.tagline}
+                  </p>
+                ) : (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Eslogan o especialidad
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p className="truncate">
+                {form.category_id
+                  ? categories.find((cat) => cat.id === form.category_id)?.name ?? "Sin categor&iacute;a"
+                  : "Sin categor&iacute;a"}
+              </p>
+              {(form.city || form.region) && (
+                <p className="truncate">
+                  {[form.city, form.region].filter(Boolean).join(", ")}
+                </p>
+              )}
+            </div>
+
+            {form.description && (
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">
+                  Acerca de
+                </p>
+                <p className="max-h-24 overflow-hidden whitespace-pre-line text-xs text-muted-foreground">
+                  {form.description}
+                </p>
+              </div>
+            )}
+
+            {[
+              form.gallery1,
+              form.gallery2,
+              form.gallery3,
+              form.gallery4,
+              form.gallery5,
+            ]
+              .map((s) => s.trim())
+              .filter(Boolean).length > 0 && (
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">
+                  Galer&iacute;a
+                </p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    form.gallery1,
+                    form.gallery2,
+                    form.gallery3,
+                    form.gallery4,
+                    form.gallery5,
+                  ]
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .slice(0, 3)
+                    .map((url, idx) => (
+                      <div
+                        key={idx}
+                        className="relative h-16 w-full overflow-hidden rounded-md bg-muted"
+                      >
+                        <Image
+                          src={url}
+                          alt={`Imagen ${idx + 1}`}
+                          fill
+                          sizes="96px"
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  {[
+                    form.gallery1,
+                    form.gallery2,
+                    form.gallery3,
+                    form.gallery4,
+                    form.gallery5,
+                  ]
+                    .map((s) => s.trim())
+                    .filter(Boolean).length > 3 && (
+                    <div className="flex h-16 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
+                      +
+                      {[
+                        form.gallery1,
+                        form.gallery2,
+                        form.gallery3,
+                        form.gallery4,
+                        form.gallery5,
+                      ]
+                        .map((s) => s.trim())
+                        .filter(Boolean).length - 3}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

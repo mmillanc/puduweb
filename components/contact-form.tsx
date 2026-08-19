@@ -60,6 +60,25 @@ export function ContactForm({ profileId, profileName }: ContactFormProps) {
       setEmail("");
       setPhone("");
       setMessage("");
+
+      try {
+        await fetch("/api/contact-message-notify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            profileId,
+            profileName,
+            senderName: name,
+            senderEmail: email,
+            senderPhone: phone || null,
+            message,
+          }),
+        });
+      } catch (err) {
+        console.error("Error al enviar notificación de email", err);
+      }
     }
   }
 
