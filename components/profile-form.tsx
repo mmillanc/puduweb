@@ -43,6 +43,7 @@ const emptyForm = {
   gallery2: "",
   gallery3: "",
   gallery4: "",
+  gallery5: "",
   is_published: false,
   featured: false,
 };
@@ -79,6 +80,7 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
           gallery2: profile.gallery_urls?.[1] ?? "",
           gallery3: profile.gallery_urls?.[2] ?? "",
           gallery4: profile.gallery_urls?.[3] ?? "",
+          gallery5: profile.gallery_urls?.[4] ?? "",
           is_published: profile.is_published,
           featured: profile.featured,
         }
@@ -157,7 +159,13 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
       return;
     }
 
-    const galleryArray = [form.gallery1, form.gallery2, form.gallery3, form.gallery4]
+    const galleryArray = [
+      form.gallery1,
+      form.gallery2,
+      form.gallery3,
+      form.gallery4,
+      form.gallery5,
+    ]
       .map((s) => s.trim())
       .filter(Boolean);
 
@@ -523,7 +531,7 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
             </div>
             <div className="sm:col-span-2">
               <label className={labelClass}>
-                Galería (hasta 4 imágenes)
+                Galería (hasta 5 imágenes)
               </label>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <ImageUpload
@@ -551,6 +559,13 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
                   label="Imagen 4"
                   value={form.gallery4}
                   onChange={(url) => update("gallery4", url)}
+                  folder="gallery"
+                  aspectRatio="square"
+                />
+                <ImageUpload
+                  label="Imagen 5"
+                  value={form.gallery5}
+                  onChange={(url) => update("gallery5", url)}
                   folder="gallery"
                   aspectRatio="square"
                 />

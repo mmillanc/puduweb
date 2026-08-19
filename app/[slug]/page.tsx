@@ -292,6 +292,14 @@ export default async function ProfileDetailPage({
     jsonLd.sameAs = [...(jsonLd.sameAs as string[] ?? []), ...socialLinks];
   }
 
+  const hasLocationForMap = Boolean(profile.address || profile.city || profile.region);
+  const mapQuery = hasLocationForMap
+    ? [profile.address, profile.city, profile.region, "Chile"].filter(Boolean).join(", ")
+    : null;
+  const mapUrl = mapQuery
+    ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
+    : null;
+
   return (
     <div className="min-h-screen">
       <script
@@ -486,6 +494,20 @@ export default async function ProfileDetailPage({
                   </div>
                 )}
               </div>
+
+              {mapUrl && (
+                <div className="mt-5">
+                  <h4 className="mb-2 text-sm font-semibold">Ubicación en el mapa</h4>
+                  <div className="overflow-hidden rounded-lg border">
+                    <iframe
+                      src={mapUrl}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="h-48 w-full border-0"
+                    />
+                  </div>
+                </div>
+              )}
 
               {profile.whatsapp && (
                 <a
