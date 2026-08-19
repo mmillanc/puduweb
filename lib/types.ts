@@ -19,6 +19,8 @@ export interface Profile {
   category_id: string | null;
   tagline: string | null;
   description: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
   city: string | null;
   region: string | null;
   phone: string | null;
@@ -50,6 +52,8 @@ export interface ProfileInput {
   category_id: string | null;
   tagline: string | null;
   description: string | null;
+   seo_title: string | null;
+   seo_description: string | null;
   city: string | null;
   region: string | null;
   phone: string | null;

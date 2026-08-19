@@ -45,6 +45,10 @@ alter table if exists public.categories
   add column if not exists seo_description text,
   add column if not exists intro_text text;
 
+alter table if exists public.profiles
+  add column if not exists seo_title text,
+  add column if not exists seo_description text;
+
 alter table public.user_roles enable row level security;
 alter table public.profile_owners enable row level security;
 

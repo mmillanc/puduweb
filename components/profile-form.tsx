@@ -21,6 +21,8 @@ const emptyForm = {
   category_id: "" as string,
   tagline: "",
   description: "",
+  seo_title: "",
+  seo_description: "",
   city: "",
   region: "",
   phone: "",
@@ -55,6 +57,8 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
           category_id: profile.category_id ?? "",
           tagline: profile.tagline ?? "",
           description: profile.description ?? "",
+          seo_title: profile.seo_title ?? "",
+          seo_description: profile.seo_description ?? "",
           city: profile.city ?? "",
           region: profile.region ?? "",
           phone: profile.phone ?? "",
@@ -164,6 +168,8 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
       category_id: form.category_id || null,
       tagline: form.tagline || null,
       description: form.description || null,
+      seo_title: form.seo_title.trim() || null,
+      seo_description: form.seo_description.trim() || null,
       city: form.city || null,
       region: form.region || null,
       phone: form.phone || null,
@@ -317,6 +323,34 @@ export function ProfileForm({ categories, profile, onClose, isAdmin = false }: P
             </div>
           </div>
         </fieldset>
+
+        {isAdmin && (
+          <fieldset className="space-y-4">
+            <legend className="mb-2 text-sm font-semibold text-muted-foreground">
+              SEO (opcional)
+            </legend>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className={labelClass}>Título SEO</label>
+                <input
+                  value={form.seo_title}
+                  onChange={(e) => update("seo_title", e.target.value)}
+                  className={inputClass}
+                  placeholder="Ej: Nutricionista en Santiago - Nutriglar"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Meta descripción</label>
+                <textarea
+                  value={form.seo_description}
+                  onChange={(e) => update("seo_description", e.target.value)}
+                  className={`${inputClass} min-h-[80px]`}
+                  placeholder="Texto que verá Google bajo el título de tu perfil."
+                />
+              </div>
+            </div>
+          </fieldset>
+        )}
 
         {/* Ubicación */}
         <fieldset className="space-y-4">

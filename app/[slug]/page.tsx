@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import type { Profile } from "@/lib/types";
+import type { Profile, Review } from "@/lib/types";
 import type { ComponentType } from "react";
 import { ReviewsSection } from "@/components/reviews-section";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -63,19 +63,29 @@ export async function generateMetadata({
 
   const profile = data as Profile;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const title = `${profile.name} - ${profile.tagline ?? "Perfil"} | PuduWeb`;
-  const description =
+  const fallbackTitle = `${profile.name} - ${profile.tagline ?? "Perfil"}`;
+  const seoTitle =
+    profile.seo_title && profile.seo_title.trim().length > 0
+      ? profile.seo_title
+      : fallbackTitle;
+
+  const fallbackDescription =
     profile.description ??
     `${profile.name} - ${profile.tagline ?? "Profesional"} en ${profile.city ?? "Chile"}`;
+
+  const seoDescription =
+    profile.seo_description && profile.seo_description.trim().length > 0
+      ? profile.seo_description
+      : fallbackDescription;
   const image = profile.cover_url ?? profile.avatar_url ?? undefined;
 
   return {
-    title,
-    description,
+    title: seoTitle,
+    description: seoDescription,
     alternates: { canonical: `${baseUrl}/${profile.slug}` },
     openGraph: {
-      title,
-      description,
+      title: `${seoTitle} | PuduWeb`,
+      description: seoDescription,
       type: "profile",
       url: `${baseUrl}/${profile.slug}`,
       images: image ? [{ url: image, width: 1200, height: 630, alt: profile.name }] : undefined,
@@ -84,8 +94,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: seoTitle,
+      description: seoDescription,
       images: image ? [image] : undefined,
     },
   };
@@ -206,15 +216,32 @@ export default async function ProfileDetailPage({
   const services = profile.services
     ? profile.services.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
+  const { data: reviewsData } = await supabaseServer
+    .from("reviews")
+    .select("rating, comment, author_name, created_at")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  const reviews = (reviewsData as Review[]) ?? [];
+  const ratings = reviews.map((r) => r.rating).filter((r) => typeof r === "number");
+  const hasRatings = ratings.length > 0;
+  const averageRating = hasRatings
+    ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
+    : null;
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const profileUrl = `${baseUrl}/${profile.slug}`;
+
+  const seoDescriptionLd =
+    profile.seo_description && profile.seo_description.trim().length > 0
+      ? profile.seo_description
+      : profile.description ?? profile.tagline ?? "";
 
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": profile.type === "pyme" ? "LocalBusiness" : "ProfessionalService",
     name: profile.name,
-    description: profile.description ?? profile.tagline ?? "",
+    description: seoDescriptionLd,
     url: profileUrl,
     ...(profile.avatar_url && { image: profile.avatar_url }),
     ...(profile.phone && { telephone: profile.phone }),
@@ -233,6 +260,30 @@ export default async function ProfileDetailPage({
       areaServed: profile.city,
     }),
     ...(services.length > 0 && { makesOffer: services.map((s) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: s } })) }),
+    ...(hasRatings && averageRating !== null && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: Number(averageRating.toFixed(1)),
+        reviewCount: ratings.length,
+      },
+    }),
+    ...(reviews.length > 0 && {
+      review: reviews.slice(0, 10).map((r) => ({
+        "@type": "Review",
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: r.rating,
+        },
+        ...(r.author_name && {
+          author: {
+            "@type": "Person",
+            name: r.author_name,
+          },
+        }),
+        ...(r.created_at && { datePublished: r.created_at }),
+        ...(r.comment && { reviewBody: r.comment }),
+      })),
+    }),
     ...(profile.hours && { openingHours: profile.hours }),
   };
 
@@ -494,42 +545,6 @@ export default async function ProfileDetailPage({
       </div>
 
       <ViewTracker profileId={profile.id} />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type":
-              profile.type === "pyme"
-                ? "LocalBusiness"
-                : "ProfessionalService",
-            name: profile.name,
-            description: profile.description ?? profile.tagline ?? undefined,
-            image: profile.cover_url ?? profile.avatar_url ?? undefined,
-            url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/${profile.slug}`,
-            telephone: profile.phone ?? undefined,
-            email: profile.email ?? undefined,
-            address: profile.address
-              ? {
-                  "@type": "PostalAddress",
-                  streetAddress: profile.address,
-                  addressLocality: profile.city ?? undefined,
-                  addressRegion: profile.region ?? undefined,
-                }
-              : undefined,
-            priceRange: undefined,
-            openingHours: profile.hours ?? undefined,
-            sameAs: [
-              profile.instagram,
-              profile.facebook,
-              profile.linkedin,
-              profile.twitter,
-              profile.website,
-            ].filter(Boolean),
-          }),
-        }}
-      />
     </div>
   );
 }
