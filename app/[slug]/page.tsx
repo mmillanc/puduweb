@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import type { Metadata } from "next";
 import type { Profile, Review } from "@/lib/types";
 import type { ComponentType } from "react";
@@ -38,20 +38,26 @@ const typeConfig = {
   vendedor: { label: "Vendedor", icon: Store },
 };
 
-const ReviewsSection = dynamic(() => import("@/components/reviews-section").then((m) => m.ReviewsSection), {
-  ssr: false,
-  loading: () => null,
-});
+const ReviewsSection = dynamicImport(
+  () => import("@/components/reviews-section").then((m) => m.ReviewsSection),
+  {
+    loading: () => null,
+  },
+);
 
-const ContactForm = dynamic(() => import("@/components/contact-form").then((m) => m.ContactForm), {
-  ssr: false,
-  loading: () => null,
-});
+const ContactForm = dynamicImport(
+  () => import("@/components/contact-form").then((m) => m.ContactForm),
+  {
+    loading: () => null,
+  },
+);
 
-const ViewTracker = dynamic(() => import("@/components/view-tracker").then((m) => m.ViewTracker), {
-  ssr: false,
-  loading: () => null,
-});
+const ViewTracker = dynamicImport(
+  () => import("@/components/view-tracker").then((m) => m.ViewTracker),
+  {
+    loading: () => null,
+  },
+);
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
