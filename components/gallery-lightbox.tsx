@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { getSizedImageUrl } from "@/lib/utils";
 
 interface GalleryLightboxProps {
   images: string[];
@@ -12,6 +13,8 @@ interface GalleryLightboxProps {
 export function GalleryLightbox({ images, profileName }: GalleryLightboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const blurDataURL =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23e5e7eb'/%3E%3C/svg%3E";
 
   if (!images || images.length === 0) return null;
 
@@ -46,11 +49,13 @@ export function GalleryLightbox({ images, profileName }: GalleryLightboxProps) {
             className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
           >
             <Image
-              src={url}
+              src={getSizedImageUrl(url, "m")}
               alt={`${profileName} - imagen ${i + 1}`}
               fill
               className="object-cover transition-transform group-hover:scale-105"
               sizes="300px"
+              placeholder="blur"
+              blurDataURL={blurDataURL}
             />
             <div className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10" />
           </button>
@@ -95,11 +100,13 @@ export function GalleryLightbox({ images, profileName }: GalleryLightboxProps) {
 
           <div className="relative h-[70vh] w-full max-w-3xl">
             <Image
-              src={images[currentIndex]}
+              src={getSizedImageUrl(images[currentIndex], "l")}
               alt={`${profileName} - imagen ${currentIndex + 1}`}
               fill
               className="object-contain"
               sizes="(min-width: 1024px) 800px, 100vw"
+              placeholder="blur"
+              blurDataURL={blurDataURL}
             />
           </div>
         </div>

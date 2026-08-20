@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Star, User, Building2, Store } from "lucide-react";
 import type { Profile } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, getSizedImageUrl } from "@/lib/utils";
 
 const typeConfig = {
   profesional: { label: "Profesional", icon: User },
@@ -13,6 +13,8 @@ const typeConfig = {
 export function ProfileCard({ profile }: { profile: Profile }) {
   const typeInfo = typeConfig[profile.type];
   const TypeIcon = typeInfo.icon;
+  const blurDataURL =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23e5e7eb'/%3E%3C/svg%3E";
 
   return (
     <Link
@@ -22,11 +24,13 @@ export function ProfileCard({ profile }: { profile: Profile }) {
       <div className="relative h-32 w-full bg-gradient-to-br from-primary/10 to-primary/5">
         {profile.cover_url ? (
           <Image
-            src={profile.cover_url}
+            src={getSizedImageUrl(profile.cover_url, "m")}
             alt={profile.name}
             fill
             className="object-cover"
             sizes="400px"
+            placeholder="blur"
+            blurDataURL={blurDataURL}
           />
         ) : null}
         {profile.featured && (
@@ -42,11 +46,13 @@ export function ProfileCard({ profile }: { profile: Profile }) {
           <div className="relative h-16 w-16 overflow-hidden rounded-full border-4 border-card bg-muted">
             {profile.avatar_url ? (
               <Image
-                src={profile.avatar_url}
+                src={getSizedImageUrl(profile.avatar_url, "s")}
                 alt={profile.name}
                 fill
                 className="object-cover"
                 sizes="64px"
+                placeholder="blur"
+                blurDataURL={blurDataURL}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-muted-foreground">

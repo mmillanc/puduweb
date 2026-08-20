@@ -1,17 +1,16 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import type { Profile, Review } from "@/lib/types";
 import type { ComponentType } from "react";
-import { ReviewsSection } from "@/components/reviews-section";
 import { FavoriteButton } from "@/components/favorite-button";
-import { ViewTracker } from "@/components/view-tracker";
-import { ContactForm } from "@/components/contact-form";
 import { ShareButton } from "@/components/share-button";
 import { ProfileCard } from "@/components/profile-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { GalleryLightbox } from "@/components/gallery-lightbox";
+import { getSizedImageUrl } from "@/lib/utils";
 import {
   MapPin,
   Phone,
@@ -38,6 +37,21 @@ const typeConfig = {
   pyme: { label: "Pyme", icon: Building2 },
   vendedor: { label: "Vendedor", icon: Store },
 };
+
+const ReviewsSection = dynamic(() => import("@/components/reviews-section").then((m) => m.ReviewsSection), {
+  ssr: false,
+  loading: () => null,
+});
+
+const ContactForm = dynamic(() => import("@/components/contact-form").then((m) => m.ContactForm), {
+  ssr: false,
+  loading: () => null,
+});
+
+const ViewTracker = dynamic(() => import("@/components/view-tracker").then((m) => m.ViewTracker), {
+  ssr: false,
+  loading: () => null,
+});
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -125,6 +139,8 @@ export default async function ProfileDetailPage({
   const profile = data as Profile;
   const typeInfo = typeConfig[profile.type];
   const TypeIcon = typeInfo.icon;
+  const blurDataURL =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23e5e7eb'/%3E%3C/svg%3E";
 
   const normalizeSocialUrl = (platform: string, raw: string): string => {
     const trimmed = raw.trim();
@@ -322,12 +338,14 @@ export default async function ProfileDetailPage({
       <div className="relative h-56 w-full bg-gradient-to-br from-primary/20 to-primary/5 sm:h-72">
         {profile.cover_url && (
           <Image
-            src={profile.cover_url}
+            src={getSizedImageUrl(profile.cover_url, "l")}
             alt={profile.name}
             fill
             className="object-cover"
             sizes="100vw"
             priority
+            placeholder="blur"
+            blurDataURL={blurDataURL}
           />
         )}
         <div className="absolute left-4 top-4 sm:left-6">
@@ -347,11 +365,13 @@ export default async function ProfileDetailPage({
           <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-background bg-muted sm:h-40 sm:w-40">
             {profile.avatar_url ? (
               <Image
-                src={profile.avatar_url}
+                src={getSizedImageUrl(profile.avatar_url, "m")}
                 alt={profile.name}
                 fill
                 className="object-cover"
                 sizes="160px"
+                placeholder="blur"
+                blurDataURL={blurDataURL}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-muted-foreground">
