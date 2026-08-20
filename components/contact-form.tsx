@@ -38,6 +38,31 @@ export function ContactForm({ profileId, profileName }: ContactFormProps) {
       return;
     }
 
+    // Rate limiting básico: evitar muchos mensajes seguidos desde el mismo email
+    try {
+      const sinceIso = new Date(Date.now() - 60 * 1000).toISOString();
+      const { count, error: rateError } = await supabase
+        .from("contact_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("profile_id", profileId)
+        .eq("sender_email", email)
+        .gte("created_at", sinceIso);
+
+      if (rateError) {
+        console.error(
+          "Error comprobando rate limit de mensajes",
+          rateError.message,
+        );
+      } else if ((count ?? 0) >= 3) {
+        setError(
+          "Estás enviando mensajes muy rápido. Intenta nuevamente en unos minutos.",
+        );
+        return;
+      }
+    } catch (err) {
+      console.error("Excepción comprobando rate limit de mensajes", err);
+    }
+
     setSending(true);
 
     const { error: insertError } = await supabase

@@ -33,6 +33,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profileError || !profile?.email) {
+      console.error(
+        "contact-message-notify: perfil sin email o error al obtener perfil",
+        profileError,
+      );
       return NextResponse.json({ ok: false });
     }
 
@@ -40,6 +44,9 @@ export async function POST(req: NextRequest) {
     const from = process.env.NOTIFICATIONS_EMAIL_FROM;
 
     if (!apiKey || !from) {
+      console.error(
+        "contact-message-notify: faltan RESEND_API_KEY o NOTIFICATIONS_EMAIL_FROM",
+      );
       return NextResponse.json({ ok: false });
     }
 
@@ -75,11 +82,19 @@ export async function POST(req: NextRequest) {
     });
 
     if (!res.ok) {
+      const errorText = await res.text();
+      console.error(
+        "contact-message-notify: error al enviar email con Resend",
+        res.status,
+        errorText,
+      );
       return NextResponse.json({ ok: false });
     }
 
+    console.log("contact-message-notify: email enviado a", to);
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("contact-message-notify: error inesperado", error);
     return NextResponse.json({ ok: false });
   }
 }

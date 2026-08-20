@@ -100,13 +100,12 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { slug } = await params;
-  const selectedCity =
-    typeof searchParams?.city === "string" ? searchParams.city : "";
-  const selectedRegion =
-    typeof searchParams?.region === "string" ? searchParams.region : "";
+  const sp = await searchParams;
+  const selectedCity = typeof sp?.city === "string" ? sp.city : "";
+  const selectedRegion = typeof sp?.region === "string" ? sp.region : "";
 
   const { getSupabaseServerClient } = await import("@/lib/supabase-server");
   const supabaseServer = getSupabaseServerClient();
