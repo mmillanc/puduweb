@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Target, Heart, Users, TrendingUp, Store, Search, ShieldCheck, MessageSquare, Star, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Sobre PuduWeb - Directorio local de profesionales y pymes",
+  title: "Sobre PuduWeb - Presencia digital sencilla para pequeños negocios",
   description:
-    "PuduWeb conecta profesionales, pymes y vendedores con personas que buscan sus servicios. Conoce nuestra misión y cómo funcionamos.",
+    "PuduWeb ayuda a que pequeños negocios y profesionales tengan una página de presentación clara, con contacto y reseñas, sin necesidad de construir un sitio web completo.",
   alternates: { canonical: "/sobre-nosotros" },
 };
 
@@ -21,7 +21,7 @@ export default function AboutPage() {
             Sobre <span className="text-primary">PuduWeb</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            El directorio local que conecta profesionales, pymes y vendedores con las personas que los buscan.
+            Una plataforma pensada para dar presencia digital sencilla a quienes no tienen tiempo, presupuesto o ganas de construir una web desde cero.
           </p>
         </div>
       </section>
@@ -35,7 +35,7 @@ export default function AboutPage() {
             </div>
             <h2 className="mb-2 text-lg font-semibold">Nuestra misión</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Hacer visible el talento local. Creemos que cada profesional y pyme merece ser encontrado por las personas que necesitan sus servicios, sin barreras ni costos excesivos.
+              Hacer visible el trabajo de pequeños negocios y profesionales. Creemos que tener una página clara, con información ordenada y un botón de contacto, no debería ser un lujo.
             </p>
           </div>
           <div className="rounded-2xl border bg-card p-8 transition hover:shadow-md">
@@ -44,7 +44,7 @@ export default function AboutPage() {
             </div>
             <h2 className="mb-2 text-lg font-semibold">Nuestros valores</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Transparencia, cercanía y utilidad real. No somos un directorio estático: somos una plataforma viva donde cada perfil cuenta con reseñas, métricas y contacto directo.
+              Transparencia, cercanía y utilidad real. Más que sumar perfiles, queremos que cada negocio tenga una ficha útil que sus clientes entiendan y puedan compartir.
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function AboutPage() {
               </div>
               <h3 className="mb-2 font-semibold">1. Busca</h3>
               <p className="text-sm text-muted-foreground">
-                Filtra por categoría, ubicación o tipo de servicio. Encuentra profesionales cerca de ti en segundos.
+                Filtra por categoría, ubicación o tipo de servicio. Encuentra negocios reales cerca de ti en segundos.
               </p>
             </div>
             <div className="text-center">
@@ -70,7 +70,7 @@ export default function AboutPage() {
               </div>
               <h3 className="mb-2 font-semibold">2. Conoce</h3>
               <p className="text-sm text-muted-foreground">
-                Revisa el perfil, lee reseñas de otros usuarios, mira métricas y servicios antes de tomar contacto.
+                Revisa la página del negocio, lee reseñas de otros usuarios y entiende qué ofrece antes de escribir o llamar.
               </p>
             </div>
             <div className="text-center">
@@ -79,7 +79,7 @@ export default function AboutPage() {
               </div>
               <h3 className="mb-2 font-semibold">3. Conecta</h3>
               <p className="text-sm text-muted-foreground">
-                Envía un mensaje directo desde el perfil o usa los datos de contacto. Sin intermediarios, sin comisiones.
+                Envía un mensaje directo desde la ficha o usa los datos de contacto. Sin intermediarios, sin comisiones.
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function AboutPage() {
 
       {/* For businesses */}
       <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
-        <h2 className="mb-8 text-center text-2xl font-bold">Para profesionales y pymes</h2>
+        <h2 className="mb-8 text-center text-2xl font-bold">Pensado para profesionales y pymes</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div className="rounded-2xl border bg-card p-6 text-center transition hover:shadow-md">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -96,7 +96,7 @@ export default function AboutPage() {
             </div>
             <h3 className="mb-1 font-semibold">Visibilidad</h3>
             <p className="text-sm text-muted-foreground">
-              Aparece en búsquedas y categorías con tu propio perfil profesional
+              Aparece en búsquedas y categorías con una página que puedes usar como tu "sitio oficial".
             </p>
           </div>
           <div className="rounded-2xl border bg-card p-6 text-center transition hover:shadow-md">
@@ -105,7 +105,7 @@ export default function AboutPage() {
             </div>
             <h3 className="mb-1 font-semibold">Reseñas reales</h3>
             <p className="text-sm text-muted-foreground">
-              Tus clientes pueden dejarte reseñas que construyen tu reputación
+              Tus clientes pueden dejarte reseñas que construyen tu reputación y dan confianza a quienes aún no te conocen.
             </p>
           </div>
           <div className="rounded-2xl border bg-card p-6 text-center transition hover:shadow-md">
@@ -114,7 +114,7 @@ export default function AboutPage() {
             </div>
             <h3 className="mb-1 font-semibold">Mensajes directos</h3>
             <p className="text-sm text-muted-foreground">
-              Recibe mensajes de clientes potenciales directamente en tu panel
+              Recibe mensajes de clientes potenciales directamente en tu panel, sin depender sólo de mensajes perdidos en redes sociales.
             </p>
           </div>
         </div>

@@ -124,3 +124,20 @@ export interface ContactMessage {
   is_read: boolean;
   created_at: string;
 }
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  content: string;
+  cover_url: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  author_id: string | null;
+  author_name: string | null;
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}

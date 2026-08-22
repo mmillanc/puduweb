@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let profileRoutes: MetadataRoute.Sitemap = [];
   let categoryRoutes: MetadataRoute.Sitemap = [];
+  let blogRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const { getSupabaseServerClient } = await import("@/lib/supabase-server");
@@ -44,9 +45,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     }));
+
+    const { data: posts } = await supabaseServer
+      .from("blog_posts")
+      .select("slug, updated_at, published_at, is_published")
+      .eq("is_published", true);
+
+    blogRoutes = (posts ?? []).map((p) => ({
+      url: `${baseUrl}/blog/${p.slug}`,
+      lastModified: new Date((p.updated_at as string) ?? (p.published_at as string) ?? new Date()),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }));
   } catch {
     // Si no hay env vars en build time, devolver solo rutas estáticas
   }
 
-  return [...staticRoutes, ...profileRoutes, ...categoryRoutes];
+  return [...staticRoutes, ...profileRoutes, ...categoryRoutes, ...blogRoutes];
 }

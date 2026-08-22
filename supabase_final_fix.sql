@@ -371,6 +371,43 @@ create policy "Reviews crear autenticados" on public.reviews for insert
   );
 
 -- ============================================================
+-- 10. blog_posts — entradas de blog (solo admin escribe)
+-- ============================================================
+create table if not exists public.blog_posts (
+  id uuid default gen_random_uuid() primary key,
+  slug text not null unique,
+  title text not null,
+  excerpt text,
+  content text not null,
+  cover_url text,
+  seo_title text,
+  seo_description text,
+  author_id uuid references auth.users(id) on delete set null,
+  author_name text,
+  is_published boolean not null default false,
+  published_at timestamptz,
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null
+);
+
+create index if not exists idx_blog_posts_published
+  on public.blog_posts(is_published, published_at desc);
+
+alter table public.blog_posts enable row level security;
+
+drop policy if exists "Blog posts lectura publica" on public.blog_posts;
+drop policy if exists "Blog posts crud admin" on public.blog_posts;
+
+-- SELECT: público ve solo publicados; admin ve todo
+create policy "Blog posts lectura publica" on public.blog_posts for select
+  using (is_published = true or public.is_admin());
+
+-- INSERT/UPDATE/DELETE: solo admin
+create policy "Blog posts crud admin" on public.blog_posts for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- ============================================================
 -- RESUMEN FINAL DE PERMISOS
 -- ============================================================
 -- PROFILES:

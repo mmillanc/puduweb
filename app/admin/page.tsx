@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import type { Profile, Category } from "@/lib/types";
+import type { Profile, Category, BlogPost } from "@/lib/types";
+import { slugify, estimateReadingTimeMinutes } from "@/lib/utils";
 import { ProfileForm } from "@/components/profile-form";
 import { useToast, ToastContainer } from "@/components/toast";
 import { AssignModal } from "@/components/assign-modal";
@@ -30,6 +32,7 @@ import {
   X,
   Check,
   Clock,
+  FileText,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -58,6 +61,23 @@ export default function AdminDashboard() {
     created_at: string;
     profile_name?: string;
   }>>([]);
+  const [showBlog, setShowBlog] = useState(false);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogLoading, setBlogLoading] = useState(false);
+  const [blogSaving, setBlogSaving] = useState(false);
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [blogForm, setBlogForm] = useState({
+    title: "",
+    slug: "",
+    excerpt: "",
+    content: "",
+    cover_url: "",
+    seo_title: "",
+    seo_description: "",
+    author_name: "",
+    is_published: false,
+    published_at: "",
+  });
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "pending" | "incomplete">("all");
   const [deletionRequests, setDeletionRequests] = useState<Array<{
     id: string;
@@ -131,6 +151,121 @@ export default function AdminDashboard() {
         ...m,
         profile_name: nameMap.get(m.profile_id) ?? "Desconocido",
       })));
+    }
+  }
+
+  async function fetchBlogPosts() {
+    setBlogLoading(true);
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setBlogPosts((data as BlogPost[] | null) ?? []);
+    setBlogLoading(false);
+  }
+
+  function startNewPost() {
+    setEditingPost(null);
+    setBlogForm({
+      title: "",
+      slug: "",
+      excerpt: "",
+      content: "",
+      cover_url: "",
+      seo_title: "",
+      seo_description: "",
+      author_name: "",
+      is_published: false,
+      published_at: new Date().toISOString().slice(0, 16),
+    });
+  }
+
+  function loadPost(post: BlogPost) {
+    setEditingPost(post);
+    setBlogForm({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt ?? "",
+      content: post.content,
+      cover_url: post.cover_url ?? "",
+      seo_title: post.seo_title ?? "",
+      seo_description: post.seo_description ?? "",
+      author_name: post.author_name ?? "",
+      is_published: post.is_published,
+      published_at: post.published_at
+        ? new Date(post.published_at).toISOString().slice(0, 16)
+        : "",
+    });
+  }
+
+  async function handleSavePost(e: FormEvent) {
+    e.preventDefault();
+    if (!blogForm.title.trim()) {
+      showToast("El título es obligatorio", "error");
+      return;
+    }
+    if (!blogForm.slug.trim()) {
+      showToast("El slug es obligatorio", "error");
+      return;
+    }
+
+    setBlogSaving(true);
+
+    const payload: Partial<BlogPost> = {
+      title: blogForm.title.trim(),
+      slug: blogForm.slug.trim(),
+      excerpt: blogForm.excerpt.trim() || null,
+      content: blogForm.content,
+      cover_url: blogForm.cover_url.trim() || null,
+      seo_title: blogForm.seo_title.trim() || null,
+      seo_description: blogForm.seo_description.trim() || null,
+      author_name: blogForm.author_name.trim() || null,
+      is_published: blogForm.is_published,
+      published_at: blogForm.is_published
+        ? (blogForm.published_at
+            ? new Date(blogForm.published_at).toISOString()
+            : new Date().toISOString())
+        : null,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (editingPost) {
+      const { error: updateError } = await supabase
+        .from("blog_posts")
+        .update(payload)
+        .eq("id", editingPost.id);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from("blog_posts")
+        .insert(payload);
+      error = insertError;
+    }
+
+    setBlogSaving(false);
+
+    if (error) {
+      showToast(`Error al guardar artículo: ${error.message}`, "error");
+    } else {
+      showToast(editingPost ? "Artículo actualizado" : "Artículo creado", "success");
+      fetchBlogPosts();
+    }
+  }
+
+  async function handleDeletePost(id: string) {
+    if (!confirm("¿Eliminar este artículo del blog?")) return;
+    const { error } = await supabase.from("blog_posts").delete().eq("id", id);
+    if (error) {
+      showToast(`Error al eliminar artículo: ${error.message}`, "error");
+    } else {
+      showToast("Artículo eliminado", "success");
+      fetchBlogPosts();
+      if (editingPost?.id === id) {
+        setEditingPost(null);
+      }
     }
   }
 
@@ -259,6 +394,17 @@ export default function AdminDashboard() {
           >
             <Users size={16} />
             Usuarios
+          </button>
+          <button
+            onClick={() => {
+              fetchBlogPosts();
+              startNewPost();
+              setShowBlog(true);
+            }}
+            className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium hover:bg-muted"
+          >
+            <FileText size={16} />
+            Blog
           </button>
           <button
             onClick={() => {
@@ -686,6 +832,263 @@ export default function AdminDashboard() {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBlog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl bg-card shadow-xl">
+            <div className="flex items-center justify-between border-b p-4">
+              <h2 className="flex items-center gap-2 text-lg font-semibold">
+                <FileText size={20} /> Blog
+              </h2>
+              <button
+                onClick={() => setShowBlog(false)}
+                className="rounded-lg p-1.5 hover:bg-muted"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="grid max-h-[80vh] grid-cols-1 gap-4 overflow-y-auto p-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+              <div className="space-y-3 border-b pb-4 md:border-b-0 md:border-r md:pb-0 md:pr-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold">Artículos recientes</h3>
+                  <button
+                    type="button"
+                    onClick={startNewPost}
+                    className="flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium hover:bg-muted"
+                  >
+                    <Plus size={12} />
+                    Nuevo
+                  </button>
+                </div>
+                {blogLoading ? (
+                  <div className="flex justify-center py-6">
+                    <Loader2 className="animate-spin text-muted-foreground" size={20} />
+                  </div>
+                ) : blogPosts.length === 0 ? (
+                  <p className="py-4 text-sm text-muted-foreground">
+                    Aún no hay artículos. Crea el primero con el botón "Nuevo".
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {blogPosts.map((post) => {
+                      const dateLabel = post.published_at
+                        ? new Date(post.published_at).toLocaleDateString("es-CL", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
+                        : null;
+                      return (
+                        <button
+                          key={post.id}
+                          type="button"
+                          onClick={() => loadPost(post)}
+                          className={`w-full rounded-lg border px-3 py-2 text-left text-sm hover:bg-muted ${
+                            editingPost?.id === post.id ? "border-primary bg-primary/5" : ""
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <p className="font-medium line-clamp-1">{post.title}</p>
+                              {dateLabel && (
+                                <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                              )}
+                            </div>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                post.is_published
+                                  ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {post.is_published ? "Publicado" : "Borrador"}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                            {post.excerpt || "Sin resumen"}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold">
+                  {editingPost ? "Editar artículo" : "Nuevo artículo"}
+                </h3>
+                <form onSubmit={handleSavePost} className="space-y-3 text-sm">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium">Título</label>
+                    <input
+                      value={blogForm.title}
+                      onChange={(e) =>
+                        setBlogForm((f) => {
+                          const newTitle = e.target.value;
+                          const autoSlugFromOldTitle = slugify(f.title || "");
+                          const shouldUpdateSlug = !f.slug || f.slug === autoSlugFromOldTitle;
+                          return {
+                            ...f,
+                            title: newTitle,
+                            slug: shouldUpdateSlug ? slugify(newTitle) : f.slug,
+                          };
+                        })
+                      }
+                      className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Título del artículo"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium">Slug</label>
+                      <div className="flex gap-2">
+                        <input
+                          value={blogForm.slug}
+                          onChange={(e) => setBlogForm((f) => ({ ...f, slug: e.target.value }))}
+                          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="ej: como-mejorar-tu-presencia-online"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setBlogForm((f) => ({
+                              ...f,
+                              slug: slugify(f.title || ""),
+                            }))
+                          }
+                          className="shrink-0 rounded-lg border px-2 py-1 text-xs font-medium hover:bg-muted"
+                        >
+                          Usar título
+                        </button>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        URL: /blog/{blogForm.slug || "tu-slug"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium">Autor</label>
+                      <input
+                        value={blogForm.author_name}
+                        onChange={(e) => setBlogForm((f) => ({ ...f, author_name: e.target.value }))}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Nombre visible del autor"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium">Publicado el</label>
+                      <input
+                        type="datetime-local"
+                        value={blogForm.published_at}
+                        onChange={(e) => setBlogForm((f) => ({ ...f, published_at: e.target.value }))}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 pt-5">
+                      <input
+                        id="blog-published"
+                        type="checkbox"
+                        checked={blogForm.is_published}
+                        onChange={(e) => setBlogForm((f) => ({ ...f, is_published: e.target.checked }))}
+                        className="h-4 w-4 rounded border"
+                      />
+                      <label htmlFor="blog-published" className="text-xs font-medium">
+                        Publicado
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium">Resumen corto</label>
+                    <textarea
+                      value={blogForm.excerpt}
+                      onChange={(e) => setBlogForm((f) => ({ ...f, excerpt: e.target.value }))}
+                      className="w-full min-h-[60px] rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Texto introductorio que se verá en el listado y en Google"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium">Contenido</label>
+                    <textarea
+                      value={blogForm.content}
+                      onChange={(e) => setBlogForm((f) => ({ ...f, content: e.target.value }))}
+                      className="w-full min-h-[140px] rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Contenido del artículo (acepta saltos de línea)"
+                    />
+                    {blogForm.content && (
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Aproximadamente {estimateReadingTimeMinutes(blogForm.content)} min de lectura
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium">URL de portada (opcional)</label>
+                    <input
+                      value={blogForm.cover_url}
+                      onChange={(e) => setBlogForm((f) => ({ ...f, cover_url: e.target.value }))}
+                      className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium">SEO title (opcional)</label>
+                      <input
+                        value={blogForm.seo_title}
+                        onChange={(e) => setBlogForm((f) => ({ ...f, seo_title: e.target.value }))}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Título para Google"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium">SEO description (opcional)</label>
+                      <input
+                        value={blogForm.seo_description}
+                        onChange={(e) => setBlogForm((f) => ({ ...f, seo_description: e.target.value }))}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Descripción para Google"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 pt-2">
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={blogSaving}
+                        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
+                      >
+                        {blogSaving && <Loader2 size={14} className="animate-spin" />}
+                        Guardar
+                      </button>
+                      {editingPost && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePost(editingPost.id)}
+                          className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                        >
+                          <Trash2 size={14} /> Eliminar
+                        </button>
+                      )}
+                    </div>
+                    {editingPost && (
+                      <a
+                        href={`/blog/${editingPost.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      >
+                        <ExternalLink size={14} /> Ver artículo
+                      </a>
+                    )}
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>

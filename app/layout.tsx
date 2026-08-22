@@ -20,21 +20,19 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
   ),
   title: {
-    default: "PuduWeb - Directorio de profesionales y pymes",
+    default: "PuduWeb - Presencia digital sencilla para pequeños negocios",
     template: "%s | PuduWeb",
   },
   description:
-    "Encuentra profesionales, pymes y vendedores cerca de ti. Directorio local con perfiles detallados, redes sociales y opciones de contacto.",
+    "Crea una página de presentación para tu negocio en minutos. PuduWeb da a tu pyme o emprendimiento una dirección web con fotos, reseñas y formulario de contacto, sin necesidad de tener tu propio sitio.",
   keywords: [
-    "directorio",
-    "profesionales",
+    "presencia digital",
+    "página web sencilla",
+    "landing page",
+    "pequeños negocios",
     "pymes",
-    "servicios",
+    "emprendedores",
     "Chile",
-    "páginas amarillas",
-    "kinesiólogo",
-    "abogado",
-    "constructor",
   ],
   authors: [{ name: "PuduWeb" }],
   icons: {
@@ -45,15 +43,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_CL",
     siteName: "PuduWeb",
-    title: "PuduWeb - Directorio de profesionales y pymes",
+    title: "PuduWeb - Presencia digital sencilla para pequeños negocios",
     description:
-      "Encuentra profesionales, pymes y vendedores cerca de ti. Directorio local con perfiles detallados.",
+      "Da a tu negocio una landing de presentación con fotos, reseñas y contacto directo, sin complicarte con un sitio web completo.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PuduWeb - Directorio de profesionales y pymes",
+    title: "PuduWeb - Presencia digital sencilla para pequeños negocios",
     description:
-      "Encuentra profesionales, pymes y vendedores cerca de ti.",
+      "Crea la página de tu negocio en minutos y compártela como tu dirección web.",
   },
   robots: {
     index: true,
@@ -78,7 +76,7 @@ export default function RootLayout({
     "@type": "WebSite",
     name: "PuduWeb",
     url: baseUrl,
-    description: "Directorio de profesionales, pymes y vendedores en Chile",
+    description: "Plataforma que entrega presencia digital sencilla a pequeños negocios y profesionales en Chile, con una página de presentación y contacto.",
     inLanguage: "es-CL",
     potentialAction: {
       "@type": "SearchAction",

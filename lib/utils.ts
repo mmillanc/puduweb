@@ -40,3 +40,12 @@ export function getSizedImageUrl(url: string, size: ImageSize): string {
   const queryString = params.toString();
   return queryString ? `${base}?${queryString}` : base;
 }
+
+export function estimateReadingTimeMinutes(text: string): number {
+  const words = text
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+  if (!words) return 1;
+  return Math.max(1, Math.round(words / 200));
+}

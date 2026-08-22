@@ -170,43 +170,41 @@ function HomeContent() {
             <div>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
                 <span className="flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400" />
-                Directorio local de Chile
+                Presencia digital sencilla para pequeños negocios
               </div>
               <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                El directorio que{" "}
-                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">conecta</span>{" "}
-                talento local con clientes
+                Da a tu negocio una página web "de verdad" sin complicarte
               </h1>
               <p className="mb-8 max-w-xl text-lg text-muted-foreground">
-                Publica tu perfil, recibe reseñas, gestiona mensajes y mide tu alcance. Todo desde un solo panel. Sin comisiones, sin intermediarios.
+                PuduWeb crea una landing de presentación para tu pyme o emprendimiento: fotos, descripción, redes, mapa y formulario de contacto. Una sola dirección web para compartir con tus clientes.
               </p>
               <div className="flex flex-wrap items-center gap-4">
                 <a
                   href="/registro"
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition"
                 >
-                  Crear perfil
+                  Crear página de mi negocio
                   <ArrowRight size={16} />
                 </a>
                 <a
                   href="#directorio"
                   className="inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold hover:bg-muted transition"
                 >
-                  Explorar directorio
+                  Ver negocios publicados
                 </a>
               </div>
               <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Sin comisiones</span>
-                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Métricas incluidas</span>
-                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Contacto directo</span>
+                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> No necesitas contratar una web completa</span>
+                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Página lista para compartir por WhatsApp e Instagram</span>
+                <span className="flex items-center gap-1"><CheckCircle2 size={16} className="text-green-500" /> Mensajes y reseñas en un solo lugar</span>
               </div>
             </div>
             <div className="relative">
               {/* TODO: Reemplazar con screenshot real del dashboard */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
-                alt="Dashboard de PuduWeb"
+                src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800&h=600&fit=crop"
+                alt="Pequeño negocio atendiendo clientes con ayuda de herramientas digitales"
                 className="rounded-2xl border shadow-2xl"
               />
               <div className="absolute -bottom-4 -left-4 rounded-xl border bg-card p-3 shadow-lg">
@@ -229,61 +227,35 @@ function HomeContent() {
       <section className="border-b bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <div className="mx-auto mb-10 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold">Más que un directorio</h2>
+            <h2 className="text-3xl font-bold">Para quienes no tienen página web (aún)</h2>
             <p className="mt-3 text-muted-foreground">
-              No solo listamos perfiles. Damos las herramientas para que profesionales y pymes crezcan.
+              Si tu negocio vive en Instagram, WhatsApp o solo en recomendaciones, PuduWeb te da una casa propia en internet sin volverte loco con la tecnología.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="rounded-2xl border bg-card p-8">
               <div className="mb-4 flex items-center gap-2">
                 <X className="text-red-500" size={20} />
-                <h3 className="font-semibold">Lo que hacen la mayoría de los directorios</h3>
+                <h3 className="font-semibold">Sin presencia digital clara</h3>
               </div>
               <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Solo una lista de nombres</li>
-                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Sin reseñas ni social proof</li>
-                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> No puedes contactar directamente</li>
-                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Sin métricas ni datos</li>
-                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Perfiles estáticos sin vida</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Tus datos repartidos entre Instagram, Google Maps y tarjetas de presentación.</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Clientes que te preguntan una y otra vez por horario, dirección o precios.</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Sin un link único y claro que puedas compartir como "la página de tu negocio".</li>
+                <li className="flex items-start gap-2"><X size={16} className="mt-0.5 shrink-0 text-red-400" /> Difícil saber si lo que haces en redes realmente trae visitas.</li>
               </ul>
             </div>
             <div className="rounded-2xl border bg-primary/5 p-8">
               <div className="mb-4 flex items-center gap-2">
                 <CheckCircle2 className="text-green-500" size={20} />
-                <h3 className="font-semibold">Lo que hace PuduWeb</h3>
+                <h3 className="font-semibold">Lo que hace PuduWeb por tu negocio</h3>
               </div>
               <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Perfiles con fotos, redes y servicios</li>
-                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Reseñas reales de clientes</li>
-                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Mensajes directos sin intermediarios</li>
-                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Métricas de visitas y mensajes</li>
-                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Favoritos y perfil destacado</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Una landing simple con todo lo importante: quién eres, qué haces, dónde estás y cómo contactarte.</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Link fácil de recordar y compartir por WhatsApp, redes o código QR.</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Reseñas de clientes y métricas básicas para entender si te están encontrando.</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Mensajes directos desde la página, sin intermediarios ni comisiones.</li>
               </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature blocks alternating image/text */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <h2 className="text-3xl font-bold">De perfil básico a presencia completa</h2>
-          <p className="mt-3 text-muted-foreground">
-            Todo lo que necesitas para destacar y crecer.
-          </p>
-        </div>
-
-        {/* Block 1: image left, text right */}
-        <div className="grid grid-cols-1 items-center gap-12 py-10 lg:grid-cols-2">
-          <div className="relative">
-            {/* TODO: Reemplazar con screenshot real */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&h=500&fit=crop"
-              alt="Panel de métricas"
-              className="rounded-2xl border shadow-lg"
-            />
           </div>
           <div>
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -291,7 +263,7 @@ function HomeContent() {
             </div>
             <h3 className="mb-3 text-xl font-bold">Métricas que importan</h3>
             <p className="mb-4 text-muted-foreground">
-              Visualiza cuántas visitas recibe tu perfil, cuántos mensajes te han enviado y cómo crece tu presencia mes a mes.
+              Mira cuántas personas visitan tu página, cuántos mensajes llegan y qué tan visible se está volviendo tu negocio.
             </p>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Contador de visitas en tiempo real</li>
@@ -309,7 +281,7 @@ function HomeContent() {
             </div>
             <h3 className="mb-3 text-xl font-bold">Búsqueda que encuentra</h3>
             <p className="mb-4 text-muted-foreground">
-              Filtra por categoría, ciudad o tipo de servicio. Tus clientes te encuentran cuando te necesitan, no por casualidad.
+              Tus futuros clientes pueden encontrarte por ciudad, rubro o tipo de servicio. Tú compartes el link; ellos llegan cuando te necesitan.
             </p>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Filtros por categoría y ubicación</li>
@@ -322,7 +294,7 @@ function HomeContent() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=700&h=500&fit=crop"
-              alt="Búsqueda de perfiles"
+              alt="Persona buscando negocios locales desde el celular"
               className="rounded-2xl border shadow-lg"
             />
           </div>
@@ -335,7 +307,7 @@ function HomeContent() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=700&h=500&fit=crop"
-              alt="Perfil profesional"
+              alt="Local pequeño mostrando sus productos en una vitrina"
               className="rounded-2xl border shadow-lg"
             />
           </div>
@@ -345,7 +317,7 @@ function HomeContent() {
             </div>
             <h3 className="mb-3 text-xl font-bold">Tu vitrina online</h3>
             <p className="mb-4 text-muted-foreground">
-              Crea un perfil completo con fotos, redes sociales, horarios, descripción de servicios y datos de contacto. Todo en un solo lugar.
+              Crea una vitrina simple pero completa: fotos, redes sociales, horarios, descripción de servicios y datos de contacto en un único lugar.
             </p>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Fotos y logo de tu negocio</li>
@@ -360,9 +332,9 @@ function HomeContent() {
       <section className="border-y bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold">Todo lo que necesitas en un solo lugar</h2>
+            <h2 className="text-3xl font-bold">Herramientas pensadas para el día a día</h2>
             <p className="mt-3 text-muted-foreground">
-              Una plataforma completa para gestionar tu presencia online.
+              No hace falta saber de marketing digital: PuduWeb te da funciones concretas para mostrar tu trabajo y atender a tus clientes.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -417,9 +389,9 @@ function HomeContent() {
       {/* Target audience */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <h2 className="text-3xl font-bold">Para todos los talentos locales</h2>
+          <h2 className="text-3xl font-bold">Pensado para negocios reales, no solo para "startups"</h2>
           <p className="mt-3 text-muted-foreground">
-            Sea cual sea tu rubro, PuduWeb te ayuda a crecer.
+            Si atiendes en tu barrio, en tu consulta, en tu taller o a domicilio, una landing clara puede marcar la diferencia.
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -432,7 +404,7 @@ function HomeContent() {
             />
             <h3 className="mb-2 font-semibold">Profesionales</h3>
             <p className="text-sm text-muted-foreground">
-              Kinesiólogos, abogados, arquitectos, contadores. Muestra tu experiencia y atrae nuevos clientes.
+              Kinesiólogos, abogados, arquitectos, contadores. Explica qué haces, muestra reseñas y comparte tu link como tu página profesional.
             </p>
           </div>
           <div className="rounded-2xl border bg-card p-8 text-center transition hover:shadow-md">
@@ -445,7 +417,7 @@ function HomeContent() {
             />
             <h3 className="mb-2 font-semibold">Pymes</h3>
             <p className="text-sm text-muted-foreground">
-              Restaurantes, ferreterías, tiendas, talleres. Tu vitrina online con fotos, horarios y contacto.
+              Restaurantes, ferreterías, tiendas, talleres. Una ficha clara con fotos, horarios, mapa y formas de contacto.
             </p>
           </div>
           <div className="rounded-2xl border bg-card p-8 text-center transition hover:shadow-md">
@@ -458,7 +430,7 @@ function HomeContent() {
             />
             <h3 className="mb-2 font-semibold">Vendedores</h3>
             <p className="text-sm text-muted-foreground">
-              Vendedores independientes y emprendedores. Crea tu perfil y conecta con quienes buscan tus productos.
+              Vendedores independientes y emprendedores. Ordena tu información en un solo lugar y deja de depender solo de mensajes sueltos.
             </p>
           </div>
         </div>
@@ -469,7 +441,7 @@ function HomeContent() {
         <div className="rounded-3xl bg-gradient-to-r from-primary to-blue-600 p-8 sm:p-12 text-center text-white">
           <h2 className="text-2xl font-bold sm:text-3xl">¿Listo para destacar?</h2>
           <p className="mt-3 text-white/90">
-            Crea tu perfil y empieza a recibir clientes hoy mismo.
+            Crea la página de tu negocio y comparte un solo link para que te encuentren y te contacten.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
             <a
@@ -492,7 +464,7 @@ function HomeContent() {
       {/* Directory */}
       <section id="directorio" className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-2xl font-bold">Explorar directorio</h2>
+          <h2 className="text-2xl font-bold">Negocios en PuduWeb</h2>
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Search size={16} />
             <input
