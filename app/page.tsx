@@ -232,7 +232,7 @@ function HomeContent() {
               Si tu negocio vive en Instagram, WhatsApp o solo en recomendaciones, PuduWeb te da una casa propia en internet sin volverte loco con la tecnología.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="rounded-2xl border bg-card p-8">
               <div className="mb-4 flex items-center gap-2">
                 <X className="text-red-500" size={20} />
@@ -256,74 +256,21 @@ function HomeContent() {
                 <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Reseñas de clientes y métricas básicas para entender si te están encontrando.</li>
                 <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-green-500" /> Mensajes directos desde la página, sin intermediarios ni comisiones.</li>
               </ul>
-          </div>
-          <div>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <BarChart3 size={24} />
             </div>
-            <h3 className="mb-3 text-xl font-bold">Métricas que importan</h3>
-            <p className="mb-4 text-muted-foreground">
-              Mira cuántas personas visitan tu página, cuántos mensajes llegan y qué tan visible se está volviendo tu negocio.
-            </p>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Contador de visitas en tiempo real</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Bandeja de mensajes de contacto</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Reseñas y calificaciones</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Block 2: text left, image right */}
-        <div className="grid grid-cols-1 items-center gap-12 py-10 lg:grid-cols-2">
-          <div className="order-2 lg:order-1">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Search size={24} />
+            <div className="rounded-2xl border bg-card p-8">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <BarChart3 size={24} />
+              </div>
+              <h3 className="mb-3 text-xl font-bold">Métricas que importan</h3>
+              <p className="mb-4 text-muted-foreground">
+                Mira cuántas personas visitan tu página, cuántos mensajes llegan y qué tan visible se está volviendo tu negocio.
+              </p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Contador de visitas en tiempo real</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Bandeja de mensajes de contacto</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Reseñas y calificaciones</li>
+              </ul>
             </div>
-            <h3 className="mb-3 text-xl font-bold">Búsqueda que encuentra</h3>
-            <p className="mb-4 text-muted-foreground">
-              Tus futuros clientes pueden encontrarte por ciudad, rubro o tipo de servicio. Tú compartes el link; ellos llegan cuando te necesitan.
-            </p>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Filtros por categoría y ubicación</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Búsqueda por nombre o servicio</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Perfiles destacados primero</li>
-            </ul>
-          </div>
-          <div className="order-1 lg:order-2 relative">
-            {/* TODO: Reemplazar con screenshot real */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=700&h=500&fit=crop"
-              alt="Persona buscando negocios locales desde el celular"
-              className="rounded-2xl border shadow-lg"
-            />
-          </div>
-        </div>
-
-        {/* Block 3: image left, text right */}
-        <div className="grid grid-cols-1 items-center gap-12 py-10 lg:grid-cols-2">
-          <div className="relative">
-            {/* TODO: Reemplazar con screenshot real */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=700&h=500&fit=crop"
-              alt="Local pequeño mostrando sus productos en una vitrina"
-              className="rounded-2xl border shadow-lg"
-            />
-          </div>
-          <div>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Store size={24} />
-            </div>
-            <h3 className="mb-3 text-xl font-bold">Tu vitrina online</h3>
-            <p className="mb-4 text-muted-foreground">
-              Crea una vitrina simple pero completa: fotos, redes sociales, horarios, descripción de servicios y datos de contacto en un único lugar.
-            </p>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Fotos y logo de tu negocio</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Instagram, WhatsApp y web</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Publica o despublica cuando quieras</li>
-            </ul>
           </div>
         </div>
       </section>
